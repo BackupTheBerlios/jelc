@@ -3,17 +3,12 @@
  */
 package elc;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-
 /**
  * @author frak
  */
 public class RunSimpleClient {
-
-	public static void main(String[] args) {
-		BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-		SimpleClient c = new SimpleClient("", "");
-		c.start();
-	}
+    public static void main(String[] args) {
+        SimpleClient c = new SimpleClient(args[0], args[1]);
+        c.start();
+    }
 }

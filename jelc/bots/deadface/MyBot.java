@@ -25,7 +25,7 @@ class MyBot extends Client {
 	String gmTo;
 	String myName;
 	PlayersOnline online;
-	PlayerList  guild=new PlayerList(new File("lnx.txt"));
+	PlayerList  guild=new PlayerList(new File("list.txt"));
 	long lastGmHi=0;
 	boolean allowNewHour=true;
 	boolean debug=false;
@@ -105,25 +105,8 @@ class MyBot extends Client {
     		replyMessage(person,"G'day to you",type);
     	}
     	else if(command.startsWith("online")){
-    		Vector tmp=online.getOnline(guild.getList());
-    		System.out.println(""+tmp.size());
-    		String res="";
-    		for(int i=0;i<tmp.size(); i++){
-    			String player=((Player)tmp.get(i)).toString();
-    			if (res.length()+player.length()<110){
-    				if(res.length()==0){
-    					res=player;
-    				}
-    				else{
-    					res=res+", "+player;
-    				}
-    			}
-    			else{
-    				replyMessage(person,""+res,type);
-    				res=player;
-    			}
-    		}
-    		replyMessage(person,""+res,type);
+    		Iterator i=online.getOnline(guild.getList()).iterator();
+    		outputList(person,type,"",i);
     	}
     	else if(command.startsWith("stats")){
     		String playerName=message.substring(6,message.length());
@@ -166,7 +149,7 @@ class MyBot extends Client {
 			replyMessage(person,"joker - displays top 5 people to find the joker",type);
 		}
 		else if(command.startsWith("#gm")){
-			if(isAdmin(person)){
+			if(inGuild(person)){
 				chatGm(message.substring(3,message.length()));
 			}
 		}
@@ -205,7 +188,7 @@ class MyBot extends Client {
 			//chatGm("\u0080hi");			
 		}
 		else if(command.startsWith("#gtpm")){
-			if(isAdmin(person)){
+			if(inGuild(person)){
 				if(gmTo!=null){
 					gmTo=null;
 					chatPm(person,"#gtpm no longer active");
@@ -237,15 +220,17 @@ class MyBot extends Client {
 		}
 		else if(command.startsWith("joker")){
 			joker.sort();
-			Enumeration e=joker.list.elements();
-
-			if(e.hasMoreElements()){
+			Iterator i=joker.list.subList(0,10).iterator();
+			//List l=joker.list.subList(0,10);
+			if(i.hasNext()){
 				
+				outputList(person,type,joker.list.size()+" people have found the joker (when i've been online) the top 10 are: ",i);
+				/*
 				String res=joker.list.size()+" people have found the joker (when i've been online) the top 5 are: "+((JokerList.Pair)e.nextElement()).toString();				
 				for(int i=1;i<5&&e.hasMoreElements();i++){
 					res=res+", "+(JokerList.Pair)e.nextElement();
 				}
-				replyMessage(person,res+".",type);
+				replyMessage(person,res+".",type);*/
 			}
 			else{
 				replyMessage(person,"no one has found him yet",type);
@@ -369,5 +354,29 @@ class MyBot extends Client {
     		joker.save();
     	}
     }
+	public void outputList(String person, int type, String header, Iterator i ){
+		String res=header;
+		String tmp;
+		if(i.hasNext()){
+			tmp=i.next().toString();
+			if (res.length()+tmp.length()<110){
+				res=res+tmp;
+			}
+			else{
+				replyMessage(person,res+".",type);
+			}
+			while(i.hasNext()){
+				tmp=i.next().toString();
+				if (res.length()+tmp.length()<110){
+					res=res+", "+tmp;
+				}
+				else{
+					replyMessage(person,res+".",type);
+					res=tmp;
+				}
+			}
+			replyMessage(person,res,type);	
+		}
+	}
     
 }

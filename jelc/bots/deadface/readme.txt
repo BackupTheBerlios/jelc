@@ -1,7 +1,7 @@
 this is the code for my bot "deadface"
 
 usage:
-you need to create a default guild list (lnx.txt) and jokerList.txt, then run it with:
+you need to create a default guild list (list.txt) and jokerList.txt, then run it with:
 MyBot username password [hostname port]
 
 

@@ -5,7 +5,8 @@
 package elc;
 /**
  * @author frak
- *  
+ *
+ *   
  */
 public class Actor {
 	/** < The actor ID from the server */
@@ -230,19 +231,19 @@ public class Actor {
         this.que = "";
         
         this.actor_id =p.data.getShort();
-        this.x_pos = p.data.getShort(3+2);
-        this.y_pos = p.data.getShort(3+4);
-        this.z_pos = p.data.getShort(3+6);
-        this.z_rot = p.data.getShort(3+8);
-        this.actor_type = p.data.getShort(3+10);
-        this.skin = p.data.get(3+12);
-        this.hair = p.data.get(3+13);
-        this.shirt = p.data.get(3+14);
-        this.pants = p.data.get(3+15);
-        this.boots = p.data.get(3+16);
-        this.max_health = p.data.getShort(3+18);
-        this.cur_health = p.data.getShort(3+20);
-        this.kind_of_actor = p.data.get(3+22);
+        this.x_pos = p.data.getShort(2);
+        this.y_pos = p.data.getShort(4);
+        this.z_pos = p.data.getShort(6);
+        this.z_rot = p.data.getShort(8);
+        this.actor_type = p.data.getShort(10);
+        this.skin = p.data.get(12);
+        this.hair = p.data.get(13);
+        this.shirt = p.data.get(14);
+        this.pants = p.data.get(15);
+        this.boots = p.data.get(16);
+        this.max_health = p.data.getShort(18);
+        this.cur_health = p.data.getShort(20);
+        this.kind_of_actor = p.data.get(22);
     }
     /*
      * for debug purposes

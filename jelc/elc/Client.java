@@ -25,13 +25,15 @@ public abstract class Client extends Thread {
     private String username = "";
 
     private String password = "";
-
     //private String server = "localhost";
     private String server = "eternal-lands.solexine.fr";
 
     private int port = 2000;
 
     private Hashtable actors;
+    private String map;
+    
+    public int time;
 
     public Client(String user, String pass) {
         this.username = user;
@@ -45,6 +47,10 @@ public abstract class Client extends Thread {
         this.server = serv;
         this.port = p;
         this.actors = new Hashtable(20);
+    }
+    public Client(String serv, int p){
+        this.server = serv;
+        this.port = p;
     }
 
     /**
@@ -191,6 +197,10 @@ public abstract class Client extends Thread {
      */
     public void onRemoveActor(Actor a) {
     }
+    
+    public void onMinute(int time){
+    	
+    }
 
     private void send(int protocol, byte[] data, int len) { 
     	ByteBuffer b = ByteBuffer.allocate(len+2);
@@ -236,6 +246,11 @@ public abstract class Client extends Thread {
         msg = this.username + " " + this.password + "\0";
         send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
     }
+	public void login(String username, String password){
+        String msg;
+        msg = this.username + " " + this.password + "\0";
+        send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
+    }
 
     public Hashtable getActors() {
         return this.actors;
@@ -244,7 +259,7 @@ public abstract class Client extends Thread {
     private void check_heartbeat() {
         if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
             this.last_heartbeat = System.currentTimeMillis();
-            send(new Packet(14, null, 1));
+            send(new Packet(Protocol.HEART_BEAT, null, 1));
         }
     }
 
@@ -269,7 +284,12 @@ public abstract class Client extends Thread {
         }
         return null;
     }
-
+   public  void updateActors(){
+    	send(new Packet(Protocol.SEND_ME_MY_ACTORS, null, 1));
+    }
+    public  void locateME(){
+    	send(new Packet(Protocol.SEND_ME_MY_ACTORS, null, 1));
+    }
     public void run() {
         Packet msg;
         int runlevel = 0;
@@ -321,6 +341,23 @@ public abstract class Client extends Thread {
                     	Actor b=(Actor)actors.remove(new Integer(msg.data.getShort()));
                         onRemoveActor(b);
                         break;
+                    case Protocol.CHANGE_MAP:
+                    	map=new String(msg.getBytes());
+                    	System.out.println(map);
+                        break;
+                    case Protocol.NEW_MINUTE:
+                    	time=msg.data.getShort();
+                        onMinute(time);
+                    	break;
+                    case Protocol.LOG_IN_OK:
+                    	onLogin();
+                    	break;
+                    case Protocol.LOG_IN_NOT_OK:
+                    	onNoLogin();
+                    	break;
+                    case Protocol.YOU_DONT_EXIST:
+                    	onLoginNotExist();
+                    	break;
                     default:
                         onUnknowPacket(msg);
                         break;
@@ -341,6 +378,7 @@ public abstract class Client extends Thread {
      * @param text
      */
     private void processChat(String text){
+    	onChat(text);
     	if (text.startsWith("[PM from ")){// for a pm message,
     		int length=8;
     		String from;
@@ -419,6 +457,32 @@ public abstract class Client extends Thread {
     			onSystemMessage(text);
     		}
     	}
-    	onChat(text);
+    }
+    /**
+     * this method is called when the user sucsessfully logs in to the game
+     *
+     */
+    public void onLogin(){
+    	
+    }
+    /**
+     * this method is called when a login fails, usually because of a bad password.
+     * this prints an error message, and exits the program.
+     * This is designed to be overwridden in sub classes if required
+     */
+    public void onNoLogin(){
+    	System.err.println("Error: login failure.");
+    	System.err.println("this is most likely caused by an incorrect password");
+    	System.exit(1);
+    }
+    /**
+     * this method is called when a login fails, usually because of a bad password.
+     * this prints an error message, and exits the program
+     * This is designed to be overwridden in sub classes if required
+     */    
+    public void onLoginNotExist(){
+    	System.err.println("Error: You Don't exist");
+    	System.err.println("check to see if your login ");
+    	System.exit(1);    	
     }
 }

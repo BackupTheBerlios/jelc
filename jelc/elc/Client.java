@@ -101,19 +101,20 @@ public abstract class Client extends Thread {
         int l;
         byte[] d = new byte[1024];
 
-        try {
-            if (this.in.available() > 3) {
-                p = this.in.readUnsignedByte();
-                l = this.in.readByte();
-                //l += this.in.readUnsignedByte() << 8;
-                this.in.read(d, 0, l);
-                msg = new Packet(p, d, l - 1);
-                return msg;
+            try {
+                if (this.in.available() > 3) {
+                    p = this.in.readUnsignedByte();
+                    l = this.in.readUnsignedByte();
+                    l += this.in.readUnsignedByte() << 8;
+                    this.in.read(d, 0, l - 1);
+                    d[l] = 0;
+                    msg = new Packet(p, d, l - 1);
+                    return msg;
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         return null;
     }
 
@@ -122,9 +123,10 @@ public abstract class Client extends Thread {
         int runlevel = 0;
 
         try {
-            this.my_socket = new Socket(this.server, this.port);
-            this.in = new DataInputStream(this.my_socket.getInputStream());
-            this.out = new DataOutputStream(this.my_socket.getOutputStream());
+            this.my_socket = new Socket(server, port);
+            this.in = new DataInputStream(my_socket.getInputStream());
+            this.out = new DataOutputStream(my_socket.getOutputStream());
+            
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -136,45 +138,47 @@ public abstract class Client extends Thread {
         this.last_heartbeat = System.currentTimeMillis();
 
         while (true) {
-            msg = poll();
+            if(this.my_socket.isConnected()){
+                msg = poll();
 
-            switch (runlevel) {
-            case 2:
-                send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
-                runlevel++;
-                break;
-            case 8:
-                login();
-                runlevel++;
-                break;
-            default:
-                if (runlevel < 1000)
+                switch (runlevel) {
+                case 2:
+                    send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
                     runlevel++;
-                break;
-            }
-
-            if (msg != null) {
-                switch (msg.protocol) {
-                case Protocol.RAW_TEXT:
-                    onChat(new String(msg.data));
+                    break;
+                case 8:
+                    login();
+                    runlevel++;
                     break;
                 default:
-                    onUnknowPacket(msg);
+                    if (runlevel < 1000)
+                        runlevel++;
                     break;
                 }
 
-            }
+                if (msg != null) {
+                    switch (msg.protocol) {
+                    case Protocol.RAW_TEXT:
+                        onChat(new String(msg.data));
+                        break;
+                    default:
+                        onUnknowPacket(msg);
+                        break;
+                    }
 
+                }
+
+                check_heartbeat();
+
+                onLoop();
+            }
+            
             try {
                 sleep(100);
             } catch (InterruptedException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-
-            check_heartbeat();
-
-            onLoop();
         }
     }
 }

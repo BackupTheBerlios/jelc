@@ -153,7 +153,7 @@ public abstract class Client extends Thread {
         Packet msg;
         int p = 0;
         int l = 0;
-        byte[] d = new byte[1024];
+        byte[] d = new byte[2048];
         try {
             if (this.in.available() > 3) {
                 p = this.in.readUnsignedByte();

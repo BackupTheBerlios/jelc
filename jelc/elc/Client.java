@@ -63,13 +63,13 @@ public abstract class Client extends Thread {
 	}
 
 	public void chat(String text) {
-		send((byte) 0, text.getBytes(), text.length() + 1);
+		send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
 	}
 
 	public void login() {
 		String msg;
 		msg = this.username + " " + this.password + "\0";
-		send(new Packet(140, msg.getBytes(), msg.length() + 1));
+		send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
 	}
 
 	private void check_heartbeat() {
@@ -87,11 +87,9 @@ public abstract class Client extends Thread {
 
 		try {
 			if (this.in.available() > 3) {
-
 				p = this.in.read();
 				l = this.in.read();
 				this.in.skip(1);
-				//System.out.println("recv p" + p + " l" + l);
 				this.in.read(d, 0, l - 1);
 				msg = new Packet(p, d, l);
 				return msg;
@@ -129,7 +127,7 @@ public abstract class Client extends Thread {
 
 			switch (runlevel) {
 			case 2:
-				send(new Packet(9, null, 1));
+				send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
 				runlevel++;
 				break;
 			case 8:
@@ -145,7 +143,7 @@ public abstract class Client extends Thread {
 			if (msg != null) {
 				//System.out.println("got msg");
 				switch (msg.protocol) {
-				case 0:
+				case Protocol.RAW_TEXT:
 					onChat(new String(msg.data));
 					break;
 				}

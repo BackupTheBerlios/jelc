@@ -14,6 +14,8 @@ import java.io.*;
  *  
  */
 public abstract class Client extends Thread {
+	public final static String DEFAULT_ADRESS= "eternal-lands.solexine.fr";
+	public final static int DEFAULT_PORT= 2000;
     private Socket my_socket;
 
     private DataInputStream in;
@@ -36,14 +38,14 @@ public abstract class Client extends Thread {
     public int time;
 
     public Client(String user, String pass) {
-        this.username = user;
-        this.password = pass;
-        this.actors = new Hashtable(200);
+        this.setUsername(user);
+        this.setPassword(pass);
+        this.actors = new Hashtable(20);
     }
     
     public Client(String user, String pass, String serv, int p) {
-        this.username = user;
-        this.password = pass;
+        this.setUsername(user);
+        this.setPassword(pass);
         this.server = serv;
         this.port = p;
         this.actors = new Hashtable(20);
@@ -243,12 +245,12 @@ public abstract class Client extends Thread {
     }
     public void login() {
         String msg;
-        msg = this.username + " " + this.password + "\0";
+        msg = this.getUsername() + " " + this.getPassword() + "\0";
         send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
     }
 	public void login(String username, String password){
         String msg;
-        msg = this.username + " " + this.password + "\0";
+        msg = this.getUsername() + " " + this.getPassword() + "\0";
         send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
     }
 
@@ -485,4 +487,30 @@ public abstract class Client extends Thread {
     	System.err.println("check to see if your login ");
     	System.exit(1);    	
     }
+
+	/**
+	 * @param username The username to set.
+	 */
+	private void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return Returns the username.
+	 */
+	private String getUsername() {
+		return username;
+	}
+	/**
+	 * @return Returns the password.
+	 */
+	public String getPassword() {
+		return password;
+	}
+	/**
+	 * @param password The password to set.
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
 }

@@ -1,3 +1,9 @@
+
+(dns) 4/3/2005
++ added ClientConnection provides a wrapper around client, to allow the use of clientInterface
++ added Clientnterface this is an interface that can be used to recieve events
++ added SimpleGui this provides a simple gui chat client, it is an example of how to use ClientInterface
+
 (dns) - 9/2/2005
 client.java:
 + added lots of event methods, these are called when that type of message is recieved.

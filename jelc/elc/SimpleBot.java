@@ -6,8 +6,6 @@
  */
 package elc;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 /**
  * @author dns

@@ -33,13 +33,13 @@ public abstract class Client extends Thread {
 
     private Vector actors;
 
-    Client(String user, String pass) {
+    public Client(String user, String pass) {
         this.username = user;
         this.password = pass;
         this.actors = new Vector(1000);
     }
     
-    Client(String user, String pass, String serv, int p) {
+    public Client(String user, String pass, String serv, int p) {
         this.username = user;
         this.password = pass;
         this.server = serv;
@@ -55,13 +55,117 @@ public abstract class Client extends Thread {
     }
 
     /**
+     * is caled when any message is recieved by the client
      * to be overwritten by subclasses
      * 
-     * @param text
+     * @param text  the contents of the message
      */
     public void onChat(String text) {
     }
+    /**
+     * this method is called when a message is recieved in the local area
+     * 
+     * @param person  the person that sent the message
+     * @param message  the message that was recieved
+     */
+    public void onChat(String person, String message){
+	}
+    
+    /**
+     * this method is called when a message is recieved on the current channel
+     *
+     * @param person  the person that sent the message
+     * @param message  the message that was recieved
+     */
+    public void onChannelChat(String person, String message){
+	}
+    /**
+     * this method is called when a message is recieved on the current channel
+     *
+     * @param person  the person that sent the message
+     * @param message  the message that was recieved
+     */
+    public void onPM(String person, String message){
+    }
+    /**
+     * this message is called when the message is sent to echo that the message has been recieved, if it isn't recieved correctly, a system message will be sent saying it failed
+     * 
+     * @param message the message sent
+     */
+    public void onPmSent(String message){
+    	
+    }
+    /**
+     * this method is called when a #gm (guild message) message is recieved
+     *
+     * @param person  the person that sent the message
+     * @param message  the message that was recieved
+     */
+    public void onGm(String person, String message){
+    }
+    /**
+     * this is recieved when a 'hint' message is recieved, for when the player is new to the game
+     * 
+     * @param message the message recieved
+     */
+    public void onHint(String message){
+    	
+    }
+    
+    /**
+     * this is called when a message as been recieved and does not fit any of the above patterns 
+     * 
+     * @param message
+     */
+    public void onSystemMessage(String message){
+    	
+    }
+    /**
+     * sends a raw text message to the local area
+     * 
+     * @param text
+     */
+    public void chat(String text) {
+        send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
+    }
+    
+    /**
+     * sends a private message, it must be in the format
+     * '/name message
+     *   
+     * @param text the text string to send
+     */
+    public  void chatPm(String text) {
+        send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+    }
+    
+    /**
+     * sends a private message to the indicated person
+     * 
+     * @param name  the name of the person to send the message
+     * @param message  the message to send
+     */
+    public void chatPm(String name, String message){
+    	chatPm("/"+name+" "+message);
+    }
 
+    /**
+     * sends a #gm (guild message) to members of the guild
+     * 
+     * @param message  the message to send
+     */
+    public void chatGm(String message){
+    	chat("#gm "+message);
+    }
+    /**
+     * sends a message to the local channel
+     * to be overwritten by subclasses
+     * 
+     * @param message
+     */
+    public void chatChannel(String message){
+    	 chat("@"+message);
+    }
     /**
      * to be overwritten by subclasses
      * 
@@ -71,6 +175,7 @@ public abstract class Client extends Thread {
     }
 
     /**
+     * 
      * to be overwritten by subclasses
      * 
      * @param p
@@ -123,15 +228,6 @@ public abstract class Client extends Thread {
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
-
-    public void chat(String text) {
-        send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
-    }
-
-    public void chatPm(String text) {
-        send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
-    }
-
     public void login() {
         String msg;
         msg = this.username + " " + this.password + "\0";
@@ -210,7 +306,7 @@ public abstract class Client extends Thread {
                 if (msg != null) {
                     switch (msg.protocol) {
                     case Protocol.RAW_TEXT:
-                        onChat(new String(msg.data.array(), 1, msg.length - 1));
+                    	processChat(new String(msg.data.array(), 1, msg.length - 1));
                         break;
                     case Protocol.ADD_NEW_ACTOR:
                         Actor a = new Actor(msg);
@@ -235,5 +331,73 @@ public abstract class Client extends Thread {
                 e1.printStackTrace();
             }
         }
+    }
+    private void processChat(String text){
+    	if (text.startsWith("[PM from ")){// for a pm message,
+    		int length=8;
+    		String from;
+    		String message;
+    		for(;length<text.length();length++){
+    			if(text.charAt(length)==':'){
+    				break;
+    			}
+    		}
+    		from=text.substring(9,length);
+    		message=text.substring(length+2,text.length()-1);
+    		onPM(from, message);
+    	}
+    	else if(text.startsWith("[PM to")){// you sent a pm message
+    	}
+    	else if(text.startsWith("[")){//must be a local chat
+    		int length=0;
+    		String from;
+    		String message;
+    		for(;length<text.length();length++){
+    			if(text.charAt(length)==']'){
+    				break;
+    			}
+    		}
+    		from=text.substring(1,length);
+    		message=text.substring(length+4,text.length());
+    		onChannelChat(from, message);
+    	}
+    	else if(text.startsWith("#GM from ")){//must be a #Gm from the guild
+    		int length=9;
+    		String from;
+    		String message;
+    		for(;length<text.length();length++){
+    			if(text.charAt(length)==':'){
+    				break;
+    			}
+    		}
+    		from=text.substring(9,length);
+    		message=text.substring(length+2,text.length());
+    		onGm(from, message);
+    	}
+    	else if(text.startsWith("#Message from ")){//is a admin mesage
+    		//
+    	}
+    	else if(text.startsWith("#Hint: ")){//hint message
+    		//hint message
+    	}
+    	else{
+    		int length=0;
+    		String from;
+    		String message;
+    		for(;length<text.length();length++){//looks for name: message
+    			if(text.charAt(length)==':'){
+    				break;
+    			}
+    		}
+    		if(length!=text.length()){//found a :, it is a local chat
+    			from=text.substring(0,length);
+    			message=text.substring(length+3,text.length());
+    			onChat(from, message);
+    		}
+    		else{//hasnt identified the type at all, so it is something else
+    			onSystemMessage(text);
+    		}
+    	}
+    	onChat(text);
     }
 }

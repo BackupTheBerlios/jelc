@@ -1,0 +1,3 @@
+(dns) 9/2/2005
+- added 
+- created simpleBot.java, it creates a simple bot, that when it sees 'hi' in local chat, it replies with 'hi user'

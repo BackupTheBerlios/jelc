@@ -19,6 +19,6 @@ todo:
 changelog:
 
 
-.6 (dns) added outputList to help format the printing of lists, it will put the most possible people on a line
+.6 (dns) added outputList to help format the printing of lists, it will put the most possible elements per line.
 
 .5 (dns) submitted it to cvs :)

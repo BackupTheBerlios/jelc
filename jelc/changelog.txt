@@ -1,4 +1,10 @@
 
+(dns)21/3/2005
+- chat and chatpm now use a queues to send messages, this is to help prevent an overflow bug when you try and send too many messages at once (like 10 pm's at once)
+
+  modified chat(message) and chatPm(message) to put strings into the queue
+  added doChat(text) and doChatPm(text) to then send items, this is called buy check_heartbeat().
+
 (dns) 4/3/2005
 + added ClientConnection provides a wrapper around client, to allow the use of clientInterface
 + added Clientnterface this is an interface that can be used to recieve events

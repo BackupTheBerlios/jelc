@@ -31,12 +31,12 @@ public abstract class Client extends Thread {
 
     private int port = 2000;
 
-    private Vector actors;
+    private Hashtable actors;
 
     public Client(String user, String pass) {
         this.username = user;
         this.password = pass;
-        this.actors = new Vector(1000);
+        this.actors = new Hashtable(200);
     }
     
     public Client(String user, String pass, String serv, int p) {
@@ -44,7 +44,7 @@ public abstract class Client extends Thread {
         this.password = pass;
         this.server = serv;
         this.port = p;
-        this.actors = new Vector(1000);
+        this.actors = new Hashtable(20);
     }
 
     /**
@@ -62,6 +62,7 @@ public abstract class Client extends Thread {
      */
     public void onChat(String text) {
     }
+    
     /**
      * this method is called when a message is recieved in the local area
      * 
@@ -79,22 +80,24 @@ public abstract class Client extends Thread {
      */
     public void onChannelChat(String person, String message){
 	}
+    
     /**
      * this method is called when a message is recieved on the current channel
      *
      * @param person  the person that sent the message
      * @param message  the message that was recieved
      */
-    public void onPM(String person, String message){
+    public void onPm(String person, String message){
     }
+    
     /**
      * this message is called when the message is sent to echo that the message has been recieved, if it isn't recieved correctly, a system message will be sent saying it failed
      * 
      * @param message the message sent
      */
     public void onPmSent(String message){
-    	
     }
+    
     /**
      * this method is called when a #gm (guild message) message is recieved
      *
@@ -103,13 +106,13 @@ public abstract class Client extends Thread {
      */
     public void onGm(String person, String message){
     }
+    
     /**
      * this is recieved when a 'hint' message is recieved, for when the player is new to the game
      * 
      * @param message the message recieved
      */
     public void onHint(String message){
-    	
     }
     
     /**
@@ -118,8 +121,8 @@ public abstract class Client extends Thread {
      * @param message
      */
     public void onSystemMessage(String message){
-    	
     }
+    
     /**
      * sends a raw text message to the local area
      * 
@@ -157,6 +160,7 @@ public abstract class Client extends Thread {
     public void chatGm(String message){
     	chat("#gm "+message);
     }
+    
     /**
      * sends a message to the local channel
      * to be overwritten by subclasses
@@ -166,6 +170,7 @@ public abstract class Client extends Thread {
     public void chatChannel(String message){
     	 chat("@"+message);
     }
+    
     /**
      * to be overwritten by subclasses
      * 
@@ -173,20 +178,18 @@ public abstract class Client extends Thread {
      */
     public void onUnknowPacket(Packet p) {
     }
-
+    
     /**
      * 
-     * to be overwritten by subclasses
-     * 
-     * @param p
+     * @param a
      */
-    public void onAddNewActor(Packet p) {
+    public void onAddNewActor(Actor  a) {
     }
-
+    
     /**
      * to be overwritten by subclasses
      */
-    public void onRemoveActor() {
+    public void onRemoveActor(Actor a) {
     }
 
     private void send(int protocol, byte[] data, int len) { 
@@ -234,7 +237,7 @@ public abstract class Client extends Thread {
         send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
     }
 
-    public Vector getActors() {
+    public Hashtable getActors() {
         return this.actors;
     }
 
@@ -310,12 +313,13 @@ public abstract class Client extends Thread {
                         break;
                     case Protocol.ADD_NEW_ACTOR:
                         Actor a = new Actor(msg);
-                        //actors.add(a.actor_id, a);
-                        onAddNewActor(msg);
+                     	actors.put(new Integer(a.actor_id),a);
+                        onAddNewActor(a);
                         break;
                     case Protocol.REMOVE_ACTOR:
                         //actors.remove(msg.data.getShort());
-                        onRemoveActor();
+                    	Actor b=(Actor)actors.remove(new Integer(msg.data.getShort()));
+                        onRemoveActor(b);
                         break;
                     default:
                         onUnknowPacket(msg);
@@ -332,6 +336,10 @@ public abstract class Client extends Thread {
             }
         }
     }
+    /**
+     * this method takes text input, and triggers the apropriate 
+     * @param text
+     */
     private void processChat(String text){
     	if (text.startsWith("[PM from ")){// for a pm message,
     		int length=8;
@@ -344,9 +352,22 @@ public abstract class Client extends Thread {
     		}
     		from=text.substring(9,length);
     		message=text.substring(length+2,text.length()-1);
-    		onPM(from, message);
+    		onPm(from, message);
     	}
-    	else if(text.startsWith("[PM to")){// you sent a pm message
+    	else if(text.startsWith("[PM to ")){// you sent a pm message
+    		
+    		int length=6;
+    		String from;
+    		String message;
+    		for(;length<text.length();length++){
+    			if(text.charAt(length)==':'){
+    				break;
+    			}
+    		}
+    		//from=text.substring(9,length); don't need, we know it is you
+    		message=text.substring(length+2,text.length()-1);
+    		onPmSent(message);
+    		
     	}
     	else if(text.startsWith("[")){//must be a local chat
     		int length=0;

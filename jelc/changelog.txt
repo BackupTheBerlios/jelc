@@ -1,3 +1,27 @@
-(dns) 9/2/2005
-- added 
-- created simpleBot.java, it creates a simple bot, that when it sees 'hi' in local chat, it replies with 'hi user'
+(dns) - 9/2/2005
+client.java:
++ added lots of event methods, these are called when that type of message is recieved.
+  they work 
+   * onChat(name,message),
+   * onPm(name,message),
+   * onGm(name,message),
+   * onChannelChat(name,message)
++added lots of send Message methods to make it easyer for directed communications, makeing bot creation easyer.
+   * public  void chatPm(String text)
+   * public void chatPm(String name, String message
+   * public void chatGm(String message)
+   * public void chatChannel(String message)     
+- changed onAddNewActor(packet p), replaceing it with:  onActor(Actor a) because it will be more usefull
+- changed onRemoveActor(), replaceing it with onRemoveActor(Actor a) to be more usefull
+- Actors are now stored in a Hashtable this is to save space(don't need a huge vector) while maintainnig performance
+
+Actor.java:
++ some bug fixes, ie ID is correct
++ added Getter's and Setters for all parameters (eclipse is cool)
++ added a toString() (for debug) will replace with returning the name later once the class works better
+
+
+simpleBot.java:
++created a simple bot. When it sees 'hi' in local chat, it replies with 'hi USERNAME'
+
+

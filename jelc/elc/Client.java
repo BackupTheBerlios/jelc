@@ -76,13 +76,15 @@ public abstract class Client extends Thread {
     public void onRemoveActor() {
     }
 
-    private void send(byte protocol, byte[] data, int len) {
+    private void send(int protocol, byte[] data, int len) { 
+    	ByteBuffer b = ByteBuffer.allocate(len+2);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)protocol);
+    	b.putShort((short)len);
+    	if(len>1)
+    		b.put(data);
         try {
-            this.out.write(protocol);
-            this.out.write(len);
-            this.out.write(0);
-            this.out.write(data);
-
+            this.out.write(b.array());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -92,12 +94,7 @@ public abstract class Client extends Thread {
 
     private void send(byte[] b) {
         try {
-            this.out.write(b[0]);
-            this.out.write(b.length);
-            this.out.write(0);
-            for (int i = 1; i < b.length; i++) {
-                this.out.write(b[i]);
-            }
+            this.out.write(b);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,7 +135,7 @@ public abstract class Client extends Thread {
     }
 
     private void check_heartbeat() {
-        if (System.currentTimeMillis() - this.last_heartbeat  > 2500) {
+        if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
         	System.out.println(System.currentTimeMillis() - this.last_heartbeat);
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(14, null, 1));
@@ -210,7 +207,7 @@ public abstract class Client extends Thread {
                         break;
                     case Protocol.ADD_NEW_ACTOR:
                         Actor a = new Actor(msg);
-                        actors.add(a.actor_id, a);
+                        //actors.add(a.actor_id, a);
                         onAddNewActor(msg);
                         break;
                     case Protocol.REMOVE_ACTOR:

@@ -7,7 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- * @author hoffmamn
+ * @author frak
  */
 public class RunSimpleClient {
 

@@ -7,9 +7,9 @@
 package elc;
 
 /**
- * @author Administrator
+ * @author frak
  *
- * This class is a port of client_serv.h from elc
+ * This class is a port of client_serv.h from elc.
  */
 public class Protocol {
 	public static final byte human_female = 0;

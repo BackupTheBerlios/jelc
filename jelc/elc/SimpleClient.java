@@ -4,7 +4,8 @@
 package elc;
 
 /**
- * @author hoffmamn
+ * @author frak
+ * A simple Client as example and test.
  */
 public class SimpleClient extends Client {
 

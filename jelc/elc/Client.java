@@ -7,9 +7,8 @@ import java.net.*;
 import java.io.*;
 
 /**
- * @author hoffmamn
+ * @author frak
  * 
- * TODO alot
  */
 public abstract class Client extends Thread {
 	private Socket my_socket;

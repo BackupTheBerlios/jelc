@@ -36,7 +36,9 @@ public abstract class Client extends Thread {
     private String map;
     
     public int time;
-
+    
+    Queue chatQueue=new LinkedList();
+    Queue pmQueue=new LinkedList();
     public Client(String user, String pass) {
         this.setUsername(user);
         this.setPassword(pass);
@@ -137,7 +139,17 @@ public abstract class Client extends Thread {
      * @param text
      */
     public void chat(String text) {
-        send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
+        //send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
+    	chatQueue.offer(text);
+    }
+    /**
+     * chat(string text) now puts items into a queue,
+     * this is called later in check_heartbeat() to send items in the queue
+     
+     * * @param text
+     */
+    private void doChat(String text){
+    	send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
     }
     
     /**
@@ -147,7 +159,17 @@ public abstract class Client extends Thread {
      * @param text the text string to send
      */
     public  void chatPm(String text) {
-        send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+        //send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+    	pmQueue.offer(text);
+    }
+    /**
+     * chatPm(string text) now puts items into a queue,
+     * this is called later in check_heartbeat() to send items in the queue 
+     * 
+     * @param text
+     */
+    private void doChatPm(String text){
+    	send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
     }
     
     /**
@@ -200,6 +222,12 @@ public abstract class Client extends Thread {
     public void onRemoveActor(Actor a) {
     }
     
+    /**
+     * this method is called when a new minute occurs
+     * to be overwritten in sub classes
+     * 
+     * @param time  the ammount of minutes game time
+     */
     public void onMinute(int time){
     	
     }
@@ -259,7 +287,13 @@ public abstract class Client extends Thread {
     }
 
     private void check_heartbeat() {
-        if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
+    	if(chatQueue.peek()!=null){
+    		this.doChat((String)chatQueue.remove());
+    	}
+    	else if(pmQueue.peek()!=null){
+    		doChatPm((String)pmQueue.remove());
+    	}
+        else if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(Protocol.HEART_BEAT, null, 1));
         }

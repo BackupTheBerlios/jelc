@@ -38,6 +38,14 @@ public abstract class Client extends Thread {
         this.password = pass;
         this.actors = new Vector(1000);
     }
+    
+    Client(String user, String pass, String serv, int p) {
+        this.username = user;
+        this.password = pass;
+        this.server = serv;
+        this.port = p;
+        this.actors = new Vector(1000);
+    }
 
     /**
      * to be overwritten by subclasses gets calld once in every main loop
@@ -136,7 +144,6 @@ public abstract class Client extends Thread {
 
     private void check_heartbeat() {
         if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
-        	System.out.println(System.currentTimeMillis() - this.last_heartbeat);
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(14, null, 1));
         }

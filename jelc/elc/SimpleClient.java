@@ -16,7 +16,11 @@ public class SimpleClient extends Client {
 
     SimpleClient(String user, String pass) {
         super(user, pass);
-
+        this.input = new BufferedReader(new InputStreamReader(System.in));
+    }
+    
+    SimpleClient(String user, String pass, String server, int port) {
+        super(user, pass, server, port);
         this.input = new BufferedReader(new InputStreamReader(System.in));
     }
 

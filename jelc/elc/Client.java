@@ -4,6 +4,9 @@
 package elc;
 
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.*;
 import java.io.*;
 
 /**
@@ -23,23 +26,55 @@ public abstract class Client extends Thread {
 
     private String password = "";
 
+    //private String server = "localhost";
     private String server = "eternal-lands.solexine.fr";
 
     private int port = 2000;
 
+    private Vector actors;
+
     Client(String user, String pass) {
         this.username = user;
         this.password = pass;
+        this.actors = new Vector(1000);
     }
 
     /**
-     * gets calld once in every main loop iteration;
+     * to be overwritten by subclasses gets calld once in every main loop
+     * iteration;
      */
-    public abstract void onLoop();
+    public void onLoop() {
+    }
 
-    public abstract void onChat(String text);
+    /**
+     * to be overwritten by subclasses
+     * 
+     * @param text
+     */
+    public void onChat(String text) {
+    }
 
-    public abstract void onUnknowPacket(Packet p);
+    /**
+     * to be overwritten by subclasses
+     * 
+     * @param p
+     */
+    public void onUnknowPacket(Packet p) {
+    }
+
+    /**
+     * to be overwritten by subclasses
+     * 
+     * @param p
+     */
+    public void onAddNewActor(Packet p) {
+    }
+
+    /**
+     * to be overwritten by subclasses
+     */
+    public void onRemoveActor() {
+    }
 
     private void send(byte protocol, byte[] data, int len) {
         try {
@@ -47,6 +82,7 @@ public abstract class Client extends Thread {
             this.out.write(len);
             this.out.write(0);
             this.out.write(data);
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -69,10 +105,15 @@ public abstract class Client extends Thread {
     }
 
     private void send(Packet p) {
+    	ByteBuffer b = ByteBuffer.allocate(p.length + 2);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
         try {
-            this.out.write(p.getBytes());
+        	b.put((byte)p.protocol);
+        	b.putShort((short)p.length);
+        	if (p.length > 1)
+        		b.put(p.data);
+        	this.out.write(b.array());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         this.last_heartbeat = System.currentTimeMillis();
@@ -82,14 +123,23 @@ public abstract class Client extends Thread {
         send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
     }
 
+    public void chatPm(String text) {
+        send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+    }
+
     public void login() {
         String msg;
         msg = this.username + " " + this.password + "\0";
         send(new Packet(Protocol.LOG_IN, msg.getBytes(), msg.length() + 1));
     }
 
+    public Vector getActors() {
+        return this.actors;
+    }
+
     private void check_heartbeat() {
-        if (this.last_heartbeat - System.currentTimeMillis() < 2500) {
+        if (System.currentTimeMillis() - this.last_heartbeat  > 2500) {
+        	System.out.println(System.currentTimeMillis() - this.last_heartbeat);
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(14, null, 1));
         }
@@ -97,24 +147,23 @@ public abstract class Client extends Thread {
 
     private Packet poll() {
         Packet msg;
-        int p;
-        int l;
+        int p = 0;
+        int l = 0;
         byte[] d = new byte[1024];
-
-            try {
-                if (this.in.available() > 3) {
-                    p = this.in.readUnsignedByte();
-                    l = this.in.readUnsignedByte();
-                    l += this.in.readUnsignedByte() << 8;
-                    this.in.read(d, 0, l - 1);
-                    d[l] = 0;
-                    msg = new Packet(p, d, l - 1);
-                    return msg;
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        try {
+            if (this.in.available() > 3) {
+                p = this.in.readUnsignedByte();
+                l = this.in.readUnsignedByte();
+                l += this.in.readUnsignedByte() << 8;
+                this.in.read(d, 0, l - 1);
+                d[l] = 0;
+                msg = new Packet(p, d, l - 1);
+                return msg;
             }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -126,7 +175,7 @@ public abstract class Client extends Thread {
             this.my_socket = new Socket(server, port);
             this.in = new DataInputStream(my_socket.getInputStream());
             this.out = new DataOutputStream(my_socket.getOutputStream());
-            
+
         } catch (UnknownHostException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -138,9 +187,8 @@ public abstract class Client extends Thread {
         this.last_heartbeat = System.currentTimeMillis();
 
         while (true) {
-            if(this.my_socket.isConnected()){
+            if (this.my_socket.isConnected()) {
                 msg = poll();
-
                 switch (runlevel) {
                 case 2:
                     send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
@@ -155,28 +203,31 @@ public abstract class Client extends Thread {
                         runlevel++;
                     break;
                 }
-
                 if (msg != null) {
                     switch (msg.protocol) {
                     case Protocol.RAW_TEXT:
-                        onChat(new String(msg.data));
+                        onChat(new String(msg.data.array(), 1, msg.length - 1));
+                        break;
+                    case Protocol.ADD_NEW_ACTOR:
+                        Actor a = new Actor(msg);
+                        actors.add(a.actor_id, a);
+                        onAddNewActor(msg);
+                        break;
+                    case Protocol.REMOVE_ACTOR:
+                        //actors.remove(msg.data.getShort());
+                        onRemoveActor();
                         break;
                     default:
                         onUnknowPacket(msg);
                         break;
                     }
-
                 }
-
                 check_heartbeat();
-
                 onLoop();
             }
-            
             try {
                 sleep(100);
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         }

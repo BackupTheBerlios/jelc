@@ -9,6 +9,7 @@ package elc;
  *  
  */
 public class Actor {
+    // TODO move the comments.
     int actor_id;
 
     /** < The actor ID from the server */
@@ -66,7 +67,7 @@ public class Actor {
 
     /** < Specifies if we have the enhanced_actor structure below */
 
-    char[] cur_frame;
+    String cur_frame;
 
     /** < Sets the current frame name that will be rendered */
 
@@ -82,17 +83,17 @@ public class Actor {
      * < Sets the texture ID, if the remapped_colors==1 - remember to
      * glDeleteTextures
      */
-    char[] skin_name;
+    String skin_name;
 
     /** < Sets the skin name */
-    char[] actor_name;
+    String actor_name;
 
     /**
      * < Sets the actors name - holds the guild name as well after a special
      * 127+color character
      */
 
-    char[] que;
+    String que;
 
     /** < Holds the current command queue */
     char last_command;
@@ -222,16 +223,38 @@ public class Actor {
     double z_speed;
 
     Actor() {
-        this.cur_frame = new char[16];
-        this.skin_name = new char[30];
-        this.actor_name = new char[30];
-        this.que = new char[11];
+        this.cur_frame = "";
+        this.skin_name = "";
+        this.actor_name = "";
+        this.que = "";
     }
 
+    /**
+     * @param p
+     * Add an actor from server (ADD_NEW_ACTOR packet).
+     */
     Actor(Packet p) {
-        this.cur_frame = new char[16];
-        this.skin_name = new char[30];
-        this.actor_name = new char[30];
-        this.que = new char[11];
+        // TODO read _all_ the data from Packet p
+        
+        this.cur_frame = "";
+        this.skin_name = "";
+        this.actor_name = new String(p.data.array(), 3+23, 30);
+        this.que = "";
+        
+        this.actor_id = p.data.getShort(3);
+        this.x_pos = p.data.getShort(3+2);
+        this.y_pos = p.data.getShort(3+4);
+        this.z_pos = p.data.getShort(3+6);
+        this.z_rot = p.data.getShort(3+8);
+        this.actor_type = p.data.getShort(3+10);
+        this.skin = p.data.get(3+12);
+        this.hair = p.data.get(3+13);
+        this.shirt = p.data.get(3+14);
+        this.pants = p.data.get(3+15);
+        this.boots = p.data.get(3+16);
+        this.max_health = p.data.getShort(3+18);
+        this.cur_health = p.data.getShort(3+20);
+        this.kind_of_actor = p.data.get(3+22);
     }
 }
+

@@ -6,6 +6,7 @@ package elc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 
 /**
  * @author frak A simple Client as example and test.
@@ -13,30 +14,26 @@ import java.io.InputStreamReader;
 public class SimpleClient extends Client {
     BufferedReader input;
 
-    /**
-     * @param user
-     * @param pass
-     */
     SimpleClient(String user, String pass) {
         super(user, pass);
 
         this.input = new BufferedReader(new InputStreamReader(System.in));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see elc.Client#onChat(java.lang.String)
-     */
     public void onChat(String text) {
-        System.out.println("text: " + text);
+        System.out.println(text);
+    }
+    
+    public void onAddNewActor(Packet p){
+        Actor i;
+        Enumeration actors = this.getActors().elements();
+        while(actors.hasMoreElements()){
+            i = (Actor)actors.nextElement();
+            System.out.print(new String(i.actor_name) + ", ");
+        }
+        System.out.println();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see elc.Client#onLoop()
-     */
     public void onLoop() {
         String line = "";
         try {
@@ -46,18 +43,13 @@ public class SimpleClient extends Client {
             e.printStackTrace();
         }
         if (!line.matches("")) {
-            this.chat(line);
+            if(line.charAt(0) == '/')
+                this.chatPm(line);
+            else
+                this.chat(line);
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see elc.Client#onUnknowPacket(elc.Packet)
-     */
-    public void onUnknowPacket(Packet p) {
-        // TODO Auto-generated method stub
-        //System.out.println("Protocol: " + p.protocol);
-    }
+
 }

@@ -3,6 +3,10 @@
  */
 package elc;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+
 /**
  * @author frak
  *  
@@ -10,25 +14,15 @@ package elc;
 public class Packet {
     int protocol;
 
-    byte[] data;
+    ByteBuffer data;
 
     int length;
 
     Packet(int p, byte[] b, int l) {
         protocol = p;
-        data = b;
+        if(l > 1)
+            data = ByteBuffer.wrap(b);
+        this.data.order(ByteOrder.LITTLE_ENDIAN);
         length = l;
-    }
-
-    byte[] getBytes() {
-        int i = 0;
-        byte[] result = new byte[length + 2];
-        result[0] = (byte) protocol;
-        result[2] = 0;
-        result[1] = (byte) length;
-        for (i = 0; i < length - 1; i++) {
-            result[i + 3] = data[i];
-        }
-        return result;
     }
 }

@@ -190,7 +190,7 @@ boolean updated=false;
 			return Integer.parseInt(str);
 		}
 		else if(tmp.length()==7){
-			str = tmp.substring(5,7);
+			str = tmp.substring(4,7);
 			return Integer.parseInt(str);
 		}
 		if(tmp.length()==4){

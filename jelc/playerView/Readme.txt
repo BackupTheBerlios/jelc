@@ -13,6 +13,9 @@ todo:
 
 changelog:
 
+.85.1
+- minor bugfix, retreveing stats for 100 and over now works, thanks Korsakoff for reporting the bug.
+
 .85 (dns)
 - added getCarry(), getHelth(), getMana() to calculate those values.
 - changed parseIt() so it gets the second number not the first so it returns the correct number when someone goes up a level.

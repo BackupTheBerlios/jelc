@@ -3,13 +3,12 @@
  */
 package elc;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Enumeration;
 
 /**
- * @author frak A simple Client as example and test.
+ * @author frak
+ * A simple Client as example and test.
  */
 public class SimpleClient extends Client {
     BufferedReader input;

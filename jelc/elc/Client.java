@@ -37,8 +37,8 @@ public abstract class Client extends Thread {
     
     public int time;
     
-    Queue chatQueue=new LinkedList();
-    Queue pmQueue=new LinkedList();
+    LinkedList chatQueue=new LinkedList();
+    LinkedList pmQueue=new LinkedList();
     public Client(String user, String pass) {
         this.setUsername(user);
         this.setPassword(pass);
@@ -105,7 +105,7 @@ public abstract class Client extends Thread {
      * 
      * @param message the message sent
      */
-    public void onPmSent(String message){
+    public void onPmSent(String person, String message){
     }
     
     /**
@@ -140,7 +140,8 @@ public abstract class Client extends Thread {
      */
     public void chat(String text) {
         //send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
-    	chatQueue.offer(text);
+    	chatQueue.addLast(text);//for java 1.4 compatablility
+    	//chatQueue.offer(text);
     }
     /**
      * chat(string text) now puts items into a queue,
@@ -160,7 +161,8 @@ public abstract class Client extends Thread {
      */
     public  void chatPm(String text) {
         //send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
-    	pmQueue.offer(text);
+    	pmQueue.addLast(text);//for java 1.4
+    	//pmQueue.offer(text);
     }
     /**
      * chatPm(string text) now puts items into a queue,
@@ -231,6 +233,9 @@ public abstract class Client extends Thread {
     public void onMinute(int time){
     	
     }
+    public void onChangeMap(String map){
+    	
+    }
 
     private void send(int protocol, byte[] data, int len) { 
     	ByteBuffer b = ByteBuffer.allocate(len+2);
@@ -287,16 +292,31 @@ public abstract class Client extends Thread {
     }
 
     private void check_heartbeat() {
-    	if(chatQueue.peek()!=null){
-    		this.doChat((String)chatQueue.remove());
+    	if(chatQueue.size()!=0){
+    		this.doChat((String)chatQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
     	}
-    	else if(pmQueue.peek()!=null){
-    		doChatPm((String)pmQueue.remove());
+    	else if(pmQueue.size()!=0){
+    		doChatPm((String)pmQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
     	}
         else if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(Protocol.HEART_BEAT, null, 1));
         }
+    	
+    	/*if(chatQueue.peek()!=null){
+    		this.doChat((String)chatQueue.remove());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
+    	else if(pmQueue.peek()!=null){
+    		doChatPm((String)pmQueue.remove());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
+        else if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
+            this.last_heartbeat = System.currentTimeMillis();
+            send(new Packet(Protocol.HEART_BEAT, null, 1));
+        }*/
     }
 
     private Packet poll() {
@@ -379,7 +399,8 @@ public abstract class Client extends Thread {
                         break;
                     case Protocol.CHANGE_MAP:
                     	map=new String(msg.getBytes());
-                    	System.out.println(map);
+                    	onChangeMap(map);
+                    	//System.out.println(map);
                         break;
                     case Protocol.NEW_MINUTE:
                     	time=msg.data.getShort();
@@ -430,17 +451,20 @@ public abstract class Client extends Thread {
     	}
     	else if(text.startsWith("[PM to ")){// you sent a pm message
     		
-    		int length=6;
-    		String from;
+    		/*int length=6;
+    		String to;
     		String message;
     		for(;length<text.length();length++){
     			if(text.charAt(length)==':'){
     				break;
     			}
-    		}
-    		//from=text.substring(9,length); don't need, we know it is you
-    		message=text.substring(length+2,text.length()-1);
-    		onPmSent(message);
+    		}*/
+    		int length=text.indexOf(": ");
+    		
+    		String to=text.substring(7,length); //we DO need to know who it is going to
+    		
+    		String message=text.substring(length+2,text.length()-1);
+    		onPmSent(to, message);
     		
     	}
     	else if(text.startsWith("[")){//must be a local chat

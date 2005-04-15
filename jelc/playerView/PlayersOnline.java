@@ -18,14 +18,19 @@ public class PlayersOnline{
 Date lastUpdate;
 Vector players;
 long updateTime=150000;
+	public PlayersOnline(){
+		players=new Vector();
+	}
+	public PlayersOnline(long updateTime){
+		players=new Vector();
+		this.updateTime=updateTime;
+	}
+	
 	public boolean needsUpdate(){
 		if(lastUpdate==null){
 			return true;
 		}
 		return (new Date().getTime()-lastUpdate.getTime()>updateTime);
-	}
-	public PlayersOnline(){
-		players=new Vector();
 	}
 	public  boolean load(){
 		boolean sucsess =false;

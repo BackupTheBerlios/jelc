@@ -35,6 +35,7 @@ JLabel timel;
 		root.add(in,BorderLayout.NORTH);
 		log=new Vector();
 		out=new JList(log);
+		
 		root.add(new JScrollPane(out), BorderLayout.CENTER);
 		//`out.setEditable(false);
 		//root.add(out, BorderLayout.CENTER);
@@ -45,7 +46,7 @@ JLabel timel;
 //		root.add(buttons);
 		root.add(timel,BorderLayout.SOUTH);
 		cc=new ClientConnection(username, password, adress, port);
-		cc.addClientInterface(this);
+		cc.addClientListener(this);
 		cc.start();
 		getContentPane().add(root);
 		this.setSize(600,700);
@@ -101,7 +102,7 @@ JLabel timel;
 	/* (non-Javadoc)
 	 * @see elc.ClientInterface#onPmSent(java.lang.String)
 	 */
-	public void onPmSent(String message) {
+	public void onPmSent(String person,String message) {
 		// TODO Auto-generated method stub
 
 	}

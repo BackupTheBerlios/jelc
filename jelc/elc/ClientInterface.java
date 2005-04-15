@@ -49,7 +49,7 @@ public interface ClientInterface {
      * 
      * @param message the message sent
      */
-    public abstract void onPmSent(String message);
+    public abstract void onPmSent(String person, String message);
     
     /**
      * this method is called when a #gm (guild message) message is recieved

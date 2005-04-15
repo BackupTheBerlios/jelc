@@ -1,3 +1,8 @@
+(dns) 15/4/2005
++altered the signature for onPmSent to: void onPmSent(String person, String message);
++added public void onChangeMap(String map) for when you change maps
++added a new interface SystemInterface, this will have system events.
++added changed addClientInterface() to addClientListener, as this is the java proper way to do events.
 
 (dns) 4/3/2005
 + added ClientConnection provides a wrapper around client, to allow the use of clientInterface

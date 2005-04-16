@@ -1,5 +1,16 @@
 This is me writeing a simple (hopefully) gui eternal lands client.
 
+seting up:
+1. copy map bmp files from eternal lands to a /maps/
+2. create (or copy) a /lists/ folder which contains player lists (like playerView)
+
+running:
+java -jar gui.jar username password
+or
+java -jar gui.jar username password hostname port
+
+
+
 what it currently does:
 +contains the ability to chat
 +shows who is online, allows the ability to read player stats, and start a pm conversation with the person
@@ -9,3 +20,4 @@ what it currently does:
 what it doesn't do:
 -no moveing, or even showing your location
 -no tradeing
+

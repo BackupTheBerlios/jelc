@@ -399,6 +399,7 @@ public abstract class Client extends Thread {
                         break;
                     case Protocol.CHANGE_MAP:
                     	map=new String(msg.getBytes());
+                    	map=map.substring(0,map.length()-1);
                     	onChangeMap(map);
                     	//System.out.println(map);
                         break;

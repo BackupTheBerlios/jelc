@@ -2,8 +2,6 @@ package bots.deadface;
 import elc.Actor;
 import elc.Client;
 import elc.Packet;
-import elc.Protocol;
-
 import playerView.*;
 
 import java.util.*;
@@ -25,7 +23,7 @@ class MyBot extends Client {
 	String gmTo;
 	String myName;
 	PlayersOnline online;
-	PlayerList  guild=new PlayerList(new File("list.txt"));
+	PlayerList  guild;
 	long lastGmHi=0;
 	boolean allowNewHour=true;
 	boolean debug=false;
@@ -36,12 +34,20 @@ class MyBot extends Client {
 		this.myName=name;
 		joker=new JokerList();
 		online=new PlayersOnline();
+		File f=new File("list.txt");
+		if(f.exists()){
+			guild= new PlayerList(f);
+		}
 	}
 	MyBot (String name, String password, String adress, int port){
 		super(name, password, adress,port);
 		this.myName=name;
 		joker=new JokerList();
 		online=new PlayersOnline();
+		File f=new File("list.txt");
+		if(f.exists()){
+			guild= new PlayerList(f);
+		}
 	}
 	
     public void onChat(String text) {
@@ -52,15 +58,15 @@ class MyBot extends Client {
 		if(isAdmin(person)){
 			processCommands(person,message,0);
 		}
-    	else if((!person.equals(myName))&&(!person.equals("Tuxedo"))){
+    	/*else if((!person.equals(myName))&&(!person.equals("Tuxedo"))){
     		//processCommands(person,message,1); //ignoreing local
     		if(message.startsWith("hi")||message.startsWith("hello")||message.startsWith("gday")){
     		//	chat("hi "+person+", i'm a bot, pm me with 'help' for instructions");
     		}
-    	}
+    	}*/
 	}
 	public void onChannelChat(String person, String message){
-    	if((!person.equals(myName))&&(!person.equals("Tuxedo"))){
+    	if(!person.equals(myName)){
     		processCommands(person,message,4);
     	}
 	}
@@ -70,7 +76,7 @@ class MyBot extends Client {
     }
 	public void onGm(String person, String message){
     	//System.out.println("person: |"+person+"|");
-    	if((!person.equals(myName))&&(!person.equals("Tuxedo"))){
+    	if(!person.equals(myName)){//ignore yourself
     		if(message.startsWith("d,")){
     			processCommands(person,message.substring(3),2);
     		}
@@ -307,11 +313,11 @@ class MyBot extends Client {
 		System.out.println((minute/60)+":" +(minute%60));*/
 		
 		if((minute%60)==0){
-			if(allowNewHour){
+			//if(allowNewHour){
 				chatGm("Happy New Hour");
-			}
+			//}
 		}
-		else if((minute%60)==59){
+		/*else if((minute%60)==59){
 			online.load();
 			if(online.findIn("Tuxedo")==null){//if tux isn't online
 				this.allowNewHour=true;
@@ -320,7 +326,7 @@ class MyBot extends Client {
 				this.allowNewHour=false;
 			}
 			
-		}
+		}*/
 	}
 	
     public void onAddNewActor(Packet p){

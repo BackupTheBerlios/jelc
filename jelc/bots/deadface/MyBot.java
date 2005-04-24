@@ -38,6 +38,9 @@ class MyBot extends Client {
 		if(f.exists()){
 			guild= new PlayerList(f);
 		}
+		else{
+			guild= new PlayerList("list",new Vector());
+		}
 	}
 	MyBot (String name, String password, String adress, int port){
 		super(name, password, adress,port);
@@ -47,6 +50,9 @@ class MyBot extends Client {
 		File f=new File("list.txt");
 		if(f.exists()){
 			guild= new PlayerList(f);
+		}
+		else{
+			guild= new PlayerList("list",new Vector());
 		}
 	}
 	

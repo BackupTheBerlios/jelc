@@ -210,7 +210,7 @@ public class Actor {
 
     /** < Unused? */
     double z_speed;
-
+    
     Actor() {
         this.cur_frame = "";
         this.skin_name = "";
@@ -227,7 +227,22 @@ public class Actor {
         
         this.cur_frame = "";
         this.skin_name = "";
-        this.actor_name = new String(p.data.array(), 23, 30);
+        byte[] tmp=p.data.array();
+        char[] chars=new char[30];
+        int count=30;
+        for (int i=0;i<30;i++){
+        	if(tmp[i+23]!=0){
+        		chars[i]=(char)tmp[i+23];
+        	}
+        	else{
+        		chars[i]='\0';
+        		count=i;
+        		break;
+        	}
+        }        
+        this.actor_name = new String(chars,0,count);
+        
+        
         this.que = "";
         
         this.actor_id =p.data.getShort();
@@ -245,11 +260,19 @@ public class Actor {
         this.cur_health = p.data.getShort(20);
         this.kind_of_actor = p.data.get(22);
     }
+    /**
+     * @param p
+     * Add an actor from server (ADD_NEW_ACTOR packet).
+     */
     /*
      * for debug purposes
      */
     public String toString(){
-    	return "Actor:"+actor_name+" id"+actor_id+"loc"+x_pos+"/"+y_pos+"/"+z_pos;
+    	return actor_name;
+    }
+    
+    public String dump(){
+    	return "Actor:"+actor_name+" id"+actor_id+" loc"+x_pos+" / "+y_pos+" / "+z_pos;
     }
 	/**
 	 * @return Returns the actor_id.
@@ -887,6 +910,36 @@ public class Actor {
 	 */
 	public void setZ_speed(double z_speed) {
 		this.z_speed = z_speed;
+	}
+	public boolean isEnhanced(){
+		return false;
+	}
+	/**
+	 * 
+	 * @return  returns the name (ignoreing guild if applicable)
+	 */
+	public String getActorStraightName(){
+		int index=this.actor_name.indexOf(" ");
+		if(index!=-1){
+			return actor_name.substring(0,index);
+		}
+		else{
+			return actor_name;
+		}
+	}
+	/**`
+	 * 
+	 * 
+	 * @return returns the guild (if applicable)
+	 */
+	public String getActorGuild(){
+		int index=this.actor_name.indexOf(" ");
+		if(index!=-1){
+			return actor_name.substring(index+2,actor_name.length());
+		}
+		else{
+			return "";
+		}
 	}
 }
 

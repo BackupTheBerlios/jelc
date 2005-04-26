@@ -1,17 +1,10 @@
 package bots.deadface;
-import elc.Actor;
-import elc.Client;
-import elc.Packet;
+import elc.*;
+
 import playerView.*;
 
 import java.util.*;
 import java.io.*;
-/*
- * Created on 7/02/2005
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 
 /**
  * @author dns
@@ -23,37 +16,25 @@ class MyBot extends Client {
 	String gmTo;
 	String myName;
 	PlayersOnline online;
-	PlayerList  guild;
+//	PlayerList  guild=new PlayerList(new File("list.txt"));
 	long lastGmHi=0;
 	boolean allowNewHour=true;
 	boolean debug=false;
 	JokerList joker;
-
+	SeenList seen;
 	MyBot (String name, String password){
 		super(name, password);
 		this.myName=name;
 		joker=new JokerList();
 		online=new PlayersOnline();
-		File f=new File("list.txt");
-		if(f.exists()){
-			guild= new PlayerList(f);
-		}
-		else{
-			guild= new PlayerList("list",new Vector());
-		}
+		seen=new SeenList(new File("seen.txt"));
 	}
 	MyBot (String name, String password, String adress, int port){
 		super(name, password, adress,port);
 		this.myName=name;
 		joker=new JokerList();
 		online=new PlayersOnline();
-		File f=new File("list.txt");
-		if(f.exists()){
-			guild= new PlayerList(f);
-		}
-		else{
-			guild= new PlayerList("list",new Vector());
-		}
+		seen=new SeenList(new File("seen.txt"));
 	}
 	
     public void onChat(String text) {
@@ -112,22 +93,77 @@ class MyBot extends Client {
 
     }
     void processCommands(String person, String message, int type){
-    	String command=message.toLowerCase();
-    	if(command.startsWith("hi")){
+    	
+//		System.out.println("index: "+(message.indexOf(" ")));
+    	int index=message.indexOf(" ");
+    	String command;
+    	if(index!=-1){
+        	 command=(message.substring(0,index)).toLowerCase();
+    	}
+    	else{
+    		command=(message).toLowerCase();
+    	}
+		//System.err.println("|"+person+"|"+command+"|"+message+"|"+type);
+    	if(command.equals("hi")){
     		replyMessage(person,"G'day to you",type);
     	}
-    	else if(command.startsWith("online")){
-    		Iterator i=online.getOnline(guild.getList()).iterator();
-    		outputList(person,type,"",i);
+    	else if(command.equals("online")){
+    		/*Iterator i=online.getOnline(guild.getList()).iterator();
+    		outputList(person,type,"",i);*/
+    		replyMessage(person,"command replaced with 'on' use that instead",type);
+    		
     	}
-    	else if(command.startsWith("stats")){
+    	else if(command.equals("on")){
+    		if(message.length()>3){
+    			String guild=message.substring(3);
+    			List tmp=seen.getGuild(guild);
+    			if(tmp.size()!=0){
+    				Iterator i=online.getOnline(tmp).iterator();
+        			outputList(person,type,"",i);
+    			}
+    			else{
+    				replyMessage(person,"i have not seen the guild: "+guild,type);
+    			}
+    		}
+    		else{
+    			SeenList.Person p=seen.find(person);
+    			
+    			if((p.getGuild()).equals("")){
+    				replyMessage(person,"sorry, you don't have a guild, or i don't know it, try; on guildtag"+p.getGuild(),type);
+    			}
+    			else{
+    	   			List tmp=seen.getGuild(p.guild);
+        			if(tmp.size()!=0){
+        				Iterator i=online.getOnline(tmp).iterator();
+            			outputList(person,type,"",i);
+        			}
+        			else{
+        				replyMessage(person,"i have not seen the guild: "+p.getGuild(),type);
+        			}
+    			}
+    		}
+    	}
+    	
+    	
+    	else if(command.equals("stats")){
     		String playerName=message.substring(6,message.length());
     		//System.out.println("|"+playerName+"|");
     		Player player=new Player(playerName,online);
     		
     		if(player.update()){
-        		System.out.println("stas for: "+player.name);
-        		replyMessage(person,"Phys: "+player.getPhysique()+", Coord: "+player.getCoordination()+", Attack: "+player.getAttack()+", Defence: "+player.getDefense()+", Combat Level: "+player.getCombatLevel(),type);
+        		//System.out.println("stas for: "+player.name);
+    			SeenList.Person p=seen.find(playerName);
+    			if(p!=null){
+    				if(p.getGuild().equals("")){
+    					replyMessage(person,playerName+"(N/A) Phys: "+player.getPhysique()+", Coord: "+player.getCoordination()+", Attack: "+player.getAttack()+", Defence: "+player.getDefense()+", Combat Level: "+player.getCombatLevel(),type);
+    				}
+    				else{
+    					replyMessage(person,playerName+"("+p.getGuild()+") Phys: "+player.getPhysique()+", Coord: "+player.getCoordination()+", Attack: "+player.getAttack()+", Defence: "+player.getDefense()+", Combat Level: "+player.getCombatLevel(),type);
+    				}
+    			}
+    			else{
+    				replyMessage(person,playerName+"(?) Phys: "+player.getPhysique()+", Coord: "+player.getCoordination()+", Attack: "+player.getAttack()+", Defence: "+player.getDefense()+", Combat Level: "+player.getCombatLevel(),type);
+    			}
         		
     		}
     		else{
@@ -136,13 +172,23 @@ class MyBot extends Client {
     		}
 
     	}
-    	else if(command.startsWith("skills")){
+    	else if(command.equals("skills")){
     		String playerName=message.substring(7,message.length());
     		Player player=new Player(playerName,online);
-    		
+    		SeenList.Person p=seen.find(playerName);
     		if(player.update()){
         		System.out.println("skills for: "+player.name);
-        		replyMessage(person,"Pickpoints:" +player.getPickPoints()+" , OA "+player.getOverall()+", Carry capacity: "+player.getCarry()+" EMU, Mana: "+player.getMana(),type);
+    			if(p!=null){
+    				if(p.getGuild().equals("")){
+    					replyMessage(person,playerName+"(N/A) Pickpoints:" +player.getPickPoints()+" , OA "+player.getOverall()+", Carry capacity: "+player.getCarry()+" EMU, Mana: "+player.getMana(),type);
+    				}
+    				else{
+    					replyMessage(person,playerName+"("+p.getGuild()+") Pickpoints:" +player.getPickPoints()+" , OA "+player.getOverall()+", Carry capacity: "+player.getCarry()+" EMU, Mana: "+player.getMana(),type);
+    				}
+        		}
+    			else{
+    				replyMessage(person,playerName+"(?) Pickpoints:" +player.getPickPoints()+" , OA "+player.getOverall()+", Carry capacity: "+player.getCarry()+" EMU, Mana: "+player.getMana(),type);
+    			}
         		replyMessage(person,"ph: "+player.getPhysique()+" co:"+player.getCoordination()+" re:"+player.getReasoning()+" wi:"+player.getWill()+" in:"+player.getInstinct()+" vi:"+player.getVitality(),type);
         		replyMessage(person,"Mag:"+player.getMagic()+" Har:"+player.getHarvest()+" Man:"+player.getManufacture()+" Alc:"+player.getAlchemy()+" Pot:"+player.getPotion()+" Sum:"+player.getSummoning()+" Cra:"+player.getCrafting(),type);        		
         		
@@ -152,16 +198,22 @@ class MyBot extends Client {
         		replyMessage(person,"error, stats wheren't retrieved, perhaps you put a wrong name in",type);
     		}
     	}
-		else if(command.startsWith("help")){
+		else if(command.equals("help")){
 			replyMessage(person,"hi, i'm a bot written by dns from the lnx guild. my accepted commands are:",type);
-			replyMessage(person,"online - shows online members of the lnx guild",type);
+			replyMessage(person,"on - shows online members of your guild (if i've seen you and your guild)",type);
+			replyMessage(person,"on GUILD - shows online members of the specified guild(if i've seen you and your guild)",type);
 			replyMessage(person,"stats NAME - shows combat statistics for the player",type);
 			replyMessage(person,"skills NAME - shows all skills for thaty player",type);
 			replyMessage(person,"sing - let me sing to you",type);
-			replyMessage(person,"joker - displays top 5 people to find the joker",type);
+			replyMessage(person,"joker - displays top 10 people to find the joker",type);
+			if(isGuild(person)){
+				replyMessage(person,"Guild Commands: (oh so secret)",type);
+				replyMessage(person,"#gtpm = redirects #gm messages to pm messages (for when you are training)",type);
+				replyMessage(person,"#gm = sends a #gm (for when you are training)",type);
+			}
 		}
 		else if(command.startsWith("#gm")){
-			if(inGuild(person)){
+			if(isGuild(person)){
 				chatGm(message.substring(3,message.length()));
 			}
 		}
@@ -182,25 +234,13 @@ class MyBot extends Client {
 			replyMessage(person,"FF buckets of bits on the bus",type);
 			//replyMessage(person,"     ad infinitum...",type);
 		}
-		else if(command.startsWith("broadcast")){
+		else if(command.equals("broadcast")){
 			if(isAdmin(person)){
 				broadcast();
 			}
 		}
-		else if(command.startsWith("#ff")){
-			System.out.println("dooing stuff");
-			Enumeration e=getActors().elements();
-			while(e.hasMoreElements()){
-				System.out.println((Actor)e.nextElement());	
-			}
-		}
-		else if(command.startsWith("#gg")){
-			//this.locateME();
-			//sendGm((char)135+"hi");
-			//chatGm("\u0080hi");			
-		}
 		else if(command.startsWith("#gtpm")){
-			if(inGuild(person)){
+			if(isGuild(person)){
 				if(gmTo!=null){
 					gmTo=null;
 					chatPm(person,"#gtpm no longer active");
@@ -210,6 +250,9 @@ class MyBot extends Client {
 					chatPm(person,"#gtpm now active");
 				}
 				System.out.println("gto: "+gmTo);
+			}
+			else{
+				chatPm(person,"eror you are not in the same guild");
 			}
 		}
 		else if (command.startsWith("#quit")){
@@ -249,7 +292,7 @@ class MyBot extends Client {
 			}
 
 		}
-		else if(command.startsWith("debug")){
+		else if(command.equals("debug")){
 			if(debug){
 				debug=false;
 				replyMessage(person,"debug off",type);
@@ -259,9 +302,49 @@ class MyBot extends Client {
 				replyMessage(person,"debug on",type);
 			}
 		}
+		else if(command.equals("see")){
+			Enumeration i=getActors().elements();
+			if(i.hasMoreElements()){
+				
+				outputList(person,type,"i can see "+getActors().size()+" people:",i);
+			}
+			else{
+				replyMessage(person,"i can not see anyone",type);
+			}
+		}
+		else if(command.equals("seen")){
+			if(message.length()>4){
+				String guild=message.substring(5);
+				System.out.println("++"+guild);
+				List tmp=seen.getGuild(guild.toUpperCase());
+				Iterator i=tmp.iterator();
+				if(i.hasNext()){
+					outputList(person,type,"i've seen "+tmp.size()+" people in the guild "+guild+": ",i);
+				}
+			}
+			else{
+				/*Iterator i=seen.list.iterator();
+				if(i.hasNext()){
+					outputList(person,type,"i've seen "+seen.list.size()+" people: ",i);
+				}*/
+				replyMessage(person,"i've seen "+seen.list.size()+" people.",type);
+			}
+		}
+		else if(command.equals("quit")){
+			this.chatGm("going down!");
+			this.chatChannel("going down!");
+			quit();
+		}
+		/*else if(command.equals("notify")){
+			String waitingFor=message.substring(7,message.length());
+			notify.addNotifyer(waitingFor,person);
+			replyMessage(person,"i will notify you when :"+waitingFor+"is online",type);
+			notify.check();
+		}*/
+		
     	else{
     		
-    		if(inGuild(person)){
+    		if(isGuild(person)){
     			
     		}
     		else if((type!=2)&&(type!=0)){
@@ -347,15 +430,24 @@ class MyBot extends Client {
     	//System.out.println("new Actor");
     }
     public boolean isAdmin(String s){
-    	return s.equals("dns");
+    	return s.equals("dns");//put names of admins here
     }
-    public boolean inGuild(String s){
-    	return guild.getList().contains(s);
+    public boolean isGuild(String s){
+//    	return guild.getList().contains(s);
+//    	return s.equals("person1")||s.equals("person2");
+		SeenList.Person p=seen.find(this.myName);
+		if(p.getGuild().equals("")){
+			System.err.println("gdfggdfd");
+			return false;//the bot has no guild
+		}
+		else{
+			return seen.getGuild(p.getGuild()).contains(p.getGuild());
+		}
     }
     public void onLogin(){
     	chatGm("I'm Back!!");
     	chatChannel("I'm Back");
-    	broadcast();
+    	//broadcast();
     }
     public void onSystemMessage(String message){
     	StringTokenizer st=new StringTokenizer(message," ");
@@ -390,5 +482,35 @@ class MyBot extends Client {
 			replyMessage(person,res,type);	
 		}
 	}
-    
+	public void outputList(String person, int type, String header, Enumeration e ){
+		String res=header;
+		String tmp;
+		if(e.hasMoreElements()){
+			tmp=e.nextElement().toString();
+			if (res.length()+tmp.length()<110){
+				res=res+tmp;
+			}
+			else{
+				replyMessage(person,res+".",type);
+			}
+			while(e.hasMoreElements()){
+				tmp=e.nextElement().toString();
+				if (res.length()+tmp.length()<110){
+					res=res+", "+tmp;
+				}
+				else{
+					replyMessage(person,res+".",type);
+					res=tmp;
+				}
+			}
+			replyMessage(person,res,type);	
+		}
+	}
+	public void notifyPending(String person){
+		this.chatPm(person,"hi "+person+" you have enough votes to join our guild. please type '#join_guild EL Linux Community");
+		this.chatPm(person,"when you have typed in the above pm me with #accept, eg /deadface #accept");
+	}
+	public void onAddNewEnhancedActor(EnhancedActor e){
+		seen.addPlayer(e.getActorStraightName(),e.getActorGuild());
+	}
 }

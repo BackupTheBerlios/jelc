@@ -11,6 +11,7 @@ import java.util.*;
 public class ClientConnection extends Client implements ClientInterface {
 Vector clients;
 Vector systemInterfaces;
+Vector actorInterfaces;
 	/**
 	 * @param user
 	 * @param pass
@@ -19,6 +20,7 @@ Vector systemInterfaces;
 		super(user, pass);
 		clients=new Vector();
 		systemInterfaces=new Vector();
+		actorInterfaces=new Vector();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -33,6 +35,7 @@ Vector systemInterfaces;
 		// TODO Auto-generated constructor stub
 		clients=new Vector();
 		systemInterfaces=new Vector();
+		actorInterfaces=new Vector();
 	}
 
 	/**
@@ -141,6 +144,26 @@ Vector systemInterfaces;
 			((SystemInterface)e.nextElement()).onChangeMap(map);
 		}
 	}
+	public void onAddNewActor(Actor a){
+		Enumeration e=actorInterfaces.elements();
+		while(e.hasMoreElements()){
+			((ActorInterface)e.nextElement()).onAddNewActor(a);
+		}	
+	}
+	public void onAddNewEnhancedActor(EnhancedActor a){
+		Enumeration e=actorInterfaces.elements();
+		while(e.hasMoreElements()){
+			((ActorInterface)e.nextElement()).onAddNewEnhancedActor(a);
+		}	
+	}
+	public void onRemoveActor(Actor a){
+		Enumeration e=actorInterfaces.elements();
+		while(e.hasMoreElements()){
+			((ActorInterface)e.nextElement()).onRemoveActor(a);
+		}	
+	}
+	
+	
 	public boolean addClientListener(ClientInterface ci){
 		return clients.add(ci);
 	}
@@ -159,5 +182,15 @@ Vector systemInterfaces;
 	}
 	public SystemInterface[] getSystemInterfaces(){
 		return (SystemInterface[])systemInterfaces.toArray();
+	}
+	
+	public boolean addActorInterface(ActorInterface si){
+		return actorInterfaces.add(si);
+	}
+	public boolean removeActorInterface(ActorInterface si){
+		return actorInterfaces.remove(si);
+	}
+	public ActorInterface[] getActorInterfaces(){
+		return (ActorInterface[])actorInterfaces.toArray();
 	}
 }

@@ -39,6 +39,9 @@ public abstract class Client extends Thread {
     
     LinkedList chatQueue=new LinkedList();
     LinkedList pmQueue=new LinkedList();
+    
+    boolean running=true;
+    int runlevel;
     public Client(String user, String pass) {
         this.setUsername(user);
         this.setPassword(pass);
@@ -219,6 +222,13 @@ public abstract class Client extends Thread {
     }
     
     /**
+     * 
+     * @param a
+     */
+    public void onAddNewEnhancedActor(EnhancedActor  a) {
+    }
+    
+    /**
      * to be overwritten by subclasses
      */
     public void onRemoveActor(Actor a) {
@@ -247,8 +257,11 @@ public abstract class Client extends Thread {
         try {
             this.out.write(b.array());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //e.printStackTrace();
+        	if (!my_socket.isClosed()){
+        		
+        		Connect();
+        	}            
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
@@ -262,17 +275,20 @@ public abstract class Client extends Thread {
         this.last_heartbeat = System.currentTimeMillis();
     }
 
-    private void send(Packet p) {
-    	ByteBuffer b = ByteBuffer.allocate(p.length + 2);
-    	b.order(ByteOrder.LITTLE_ENDIAN);
-        try {
-        	b.put((byte)p.protocol);
-        	b.putShort((short)p.length);
+	private void send(Packet p) {
+		try {
+			ByteBuffer b = ByteBuffer.allocate(p.length + 2);
+			b.order(ByteOrder.LITTLE_ENDIAN);
+			b.put((byte)p.protocol);
+			b.putShort((short)p.length);
         	if (p.length > 1)
         		b.put(p.data);
         	this.out.write(b.array());
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	if (!my_socket.isClosed()){
+        		Connect();
+        	}
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
@@ -292,19 +308,10 @@ public abstract class Client extends Thread {
     }
 
     private void check_heartbeat() {
-    	if(chatQueue.size()!=0){
-    		this.doChat((String)chatQueue.removeFirst());
-            this.last_heartbeat = System.currentTimeMillis();
-    	}
-    	else if(pmQueue.size()!=0){
-    		doChatPm((String)pmQueue.removeFirst());
-            this.last_heartbeat = System.currentTimeMillis();
-    	}
-        else if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
+    	if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(Protocol.HEART_BEAT, null, 1));
-        }
-    	
+        }    	
     	/*if(chatQueue.peek()!=null){
     		this.doChat((String)chatQueue.remove());
             this.last_heartbeat = System.currentTimeMillis();
@@ -317,6 +324,16 @@ public abstract class Client extends Thread {
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(Protocol.HEART_BEAT, null, 1));
         }*/
+    }
+    private void sendChat(){
+    	if(chatQueue.size()!=0){
+    		this.doChat((String)chatQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
+    	else if(pmQueue.size()!=0){
+    		doChatPm((String)pmQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
     }
 
     private Packet poll() {
@@ -335,7 +352,6 @@ public abstract class Client extends Thread {
                 return msg;
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return null;
@@ -346,26 +362,35 @@ public abstract class Client extends Thread {
     public  void locateME(){
     	send(new Packet(Protocol.SEND_ME_MY_ACTORS, null, 1));
     }
+    
+    public boolean Connect(){
+        runlevel = 0;
+    	try {
+    		if(my_socket!=null){
+    			my_socket.close();
+    		}
+    		this.my_socket = new Socket(server, port);
+    		this.in = new DataInputStream(my_socket.getInputStream());
+    		this.out = new DataOutputStream(my_socket.getOutputStream());
+    		return true;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+        	e.printStackTrace();
+        	return false;
+        }
+    }
+    
+    
     public void run() {
         Packet msg;
-        int runlevel = 0;
-
-        try {
-            this.my_socket = new Socket(server, port);
-            this.in = new DataInputStream(my_socket.getInputStream());
-            this.out = new DataOutputStream(my_socket.getOutputStream());
-
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        Actor actor;
+        EnhancedActor enhancedActor;
+        Connect();
         this.last_heartbeat = System.currentTimeMillis();
 
-        while (true) {
+        while (running) {
             if (this.my_socket.isConnected()) {
                 msg = poll();
                 switch (runlevel) {
@@ -388,14 +413,19 @@ public abstract class Client extends Thread {
                     	processChat(new String(msg.data.array(), 1, msg.length - 1));
                         break;
                     case Protocol.ADD_NEW_ACTOR:
-                        Actor a = new Actor(msg);
-                     	actors.put(new Integer(a.actor_id),a);
-                        onAddNewActor(a);
+                        actor = new Actor(msg);
+                     	actors.put(new Integer(actor.actor_id),actor);
+                        onAddNewActor(actor);
                         break;
+                    case Protocol.ADD_NEW_ENHANCED_ACTOR:
+                    	enhancedActor=new EnhancedActor(msg);
+                    	actors.put(new Integer(enhancedActor.actor_id),enhancedActor);
+                    	this.onAddNewEnhancedActor(enhancedActor);
+                    	break;
                     case Protocol.REMOVE_ACTOR:
                         //actors.remove(msg.data.getShort());
-                    	Actor b=(Actor)actors.remove(new Integer(msg.data.getShort()));
-                        onRemoveActor(b);
+                    	actor=(Actor)actors.remove(new Integer(msg.data.getShort()));
+                        onRemoveActor(actor);
                         break;
                     case Protocol.CHANGE_MAP:
                     	map=new String(msg.getBytes());
@@ -422,6 +452,7 @@ public abstract class Client extends Thread {
                     }
                 }
                 check_heartbeat();
+            	sendChat();
                 onLoop();
             }
             try {
@@ -571,5 +602,26 @@ public abstract class Client extends Thread {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	/**
+	 * call this method when you want to quit.
+	 *
+	 */
+	public void quit(){
+		this.running=false;
+    	while(chatQueue.size()!=0){
+    		this.doChat((String)chatQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
+    	while(pmQueue.size()!=0){
+    		doChatPm((String)pmQueue.removeFirst());
+            this.last_heartbeat = System.currentTimeMillis();
+    	}
+		try {
+			my_socket.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 }

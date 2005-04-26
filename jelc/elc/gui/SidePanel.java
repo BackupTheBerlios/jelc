@@ -1,22 +1,9 @@
 package elc.gui;
 import javax.swing.*;
 
-import playerView.Player;
-import playerView.PlayerList;
-import playerView.PlayersOnline;
-
 import java.awt.*;
-import java.io.File;
-import java.util.Vector;
 
 import elc.*;
-import playerView.*;
-/*
- * Created on 15/04/2005
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 
 /**
  * @author dns
@@ -30,7 +17,7 @@ JLabel mapName;
 JLabel time;
 
 OnlineList on;
-
+ActorPanel actor;
 
 /**
 	 * @param layout
@@ -51,6 +38,9 @@ OnlineList on;
 		
 		on=new OnlineList(gui);
 		this.add(on,BorderLayout.CENTER);
+		
+		actor=new ActorPanel(gui);
+		this.add(actor,BorderLayout.SOUTH);
 		
 		gui.getClientConnection().addSystemListener(this);
 		

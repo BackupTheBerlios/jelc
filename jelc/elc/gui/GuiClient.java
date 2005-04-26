@@ -23,6 +23,7 @@ public class GuiClient extends JFrame{
 	SidePanel side;
 	ClientConnection con;
 	PlayersOnline online;
+	Logger log;
 	
 	GuiClient(String name, String password,String hostname,int port){
 		super("Java EL Client");
@@ -47,9 +48,12 @@ public class GuiClient extends JFrame{
 		this.setSize(600,700);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
+		log=new Logger(this, new java.io.File("chat.log"));
+		
 		
 		con.start();
 		this.setVisible(true);
+		log.close();
 	}
 	public ClientConnection getClientConnection(){
 		return con;

@@ -1,13 +1,17 @@
-(dns)16/4/05
-+created MapView.java, this contains a picure of the current map, this loads a map from /maps/mapname.bmp so create a folder and copy them to this folder to use
-+creaded StatsDialog.java this is a JDialog containing player stats
-+committed the project to cvs
+(dns) 26/4/05
++ created ActorPanel, it is simple now but it does contain a list of people and creatures which you can see
++ created logger.java (though it doesn't really work) to output a chat log.
 
-(dns)15/4/05
+(dns) 16/4/05
++ created MapView.java, this contains a picure of the current map, this loads a map from /maps/mapname.bmp so create a folder and copy them to this folder to use
++ creaded StatsDialog.java this is a JDialog containing player stats
++ committed the project to cvs
+
+(dns) 15/4/05
 + createdSidePanel to encapsulate the side panel, this contains the map name, the time and the online list(below)
 + onlineList, this is a panel which encapsulates online, this is based on playerView.Gui
 
-(dns)14/4/05
-+started the project
-+created GuiClient.java, this is the basis for the gui
-+created CommunicationsTab, this has several chat channels: local, where everyhing is outputed, system for system messages, channel for channel communcation, and has the ability to have tabs for pm conversations
+(dns) 14/4/05
++ started the project
++ created GuiClient.java, this is the basis for the gui
++ created CommunicationsTab, this has several chat channels: local, where everyhing is outputed, system for system messages, channel for channel communcation, and has the ability to have tabs for pm conversations

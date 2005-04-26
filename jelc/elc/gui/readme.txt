@@ -15,9 +15,12 @@ what it currently does:
 +contains the ability to chat
 +shows who is online, allows the ability to read player stats, and start a pm conversation with the person
 +shows a simple map reperesentation 
++shows creatures people and animals you can see. (buggy)
 
 
 what it doesn't do:
--no moveing, or even showing your location
--no tradeing
+-most stuff eg:
+-no moveing, or even showing your location (comeing soon)
+-no interacting with the world eg harvesting fighting etc.
+
 

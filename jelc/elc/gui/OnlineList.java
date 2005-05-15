@@ -94,10 +94,14 @@ public class OnlineList extends JPanel implements Runnable, ActionListener{
 		File f=new File("./lists/");
 		System.out.println(f);
 		File[] files=f.listFiles();
-		for(int i=0;i<files.length;i++){
-			if (files[i].isFile()&&files[i].canRead()){
-				views.add(new PlayerList(files[i]));
+		if(f.exists()&&f.isDirectory())
+			for(int i=0;i<files.length;i++){
+				if (files[i].isFile()&&files[i].canRead()){
+					views.add(new PlayerList(files[i]));
+				}
 			}
+		else{
+			System.err.println("no lists loaded. put some txt files in ./lists/");
 		}
 	}
 	public void run() {

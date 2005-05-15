@@ -96,7 +96,8 @@ File file;
 		}
 		else{
 			looking.setLastSeen(System.currentTimeMillis());
-			System.out.println("updated: "+looking);
+			looking.setGuild(guild);
+			//System.out.println("updated: "+looking);
 			new Thread(this).start();
 		}
 		return true;
@@ -164,8 +165,14 @@ File file;
 		public String getName(){
 			return name;
 		}
+		public void setName(String name){
+			this.name=name;
+		}
 		public String getGuild(){
 			return guild;
+		}
+		public void setGuild(String guild){
+			this.guild=guild;
 		}
 		/**
 		 * @param lastSeen The lastSeen to set.

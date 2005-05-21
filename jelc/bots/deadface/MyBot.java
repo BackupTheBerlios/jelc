@@ -440,9 +440,7 @@ class MyBot extends Client {
 			System.err.println("gdfggdfd");
 			return false;//the bot has no guild
 		}
-		else{
-			return seen.getGuild(p.getGuild()).contains(p.getGuild());
-		}
+		return seen.getGuild(p.getGuild()).contains(p.getGuild());
     }
     public void onLogin(){
     	chatGm("I'm Back!!");

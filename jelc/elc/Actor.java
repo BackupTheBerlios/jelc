@@ -923,9 +923,7 @@ public class Actor {
 		if(index!=-1){
 			return actor_name.substring(0,index);
 		}
-		else{
-			return actor_name;
-		}
+		return actor_name;
 	}
 	/**`
 	 * 
@@ -937,9 +935,7 @@ public class Actor {
 		if(index!=-1){
 			return actor_name.substring(index+2,actor_name.length());
 		}
-		else{
-			return "";
-		}
+		return "";
 	}
 }
 

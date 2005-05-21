@@ -62,10 +62,8 @@ File file;
 			}
 			return false;
 		}
-		else{
-			System.err.println("bad file: "+f.getName());
-			return false;
-		}
+		System.err.println("bad file: "+f.getName());
+		return false;
 	}
 	public synchronized boolean save(File f){
 		try {
@@ -94,12 +92,10 @@ File file;
 			}
 			return res;
 		}
-		else{
-			looking.setLastSeen(System.currentTimeMillis());
-			looking.setGuild(guild);
-			//System.out.println("updated: "+looking);
-			new Thread(this).start();
-		}
+		looking.setLastSeen(System.currentTimeMillis());
+		looking.setGuild(guild);
+		//System.out.println("updated: "+looking);
+		new Thread(this).start();
 		return true;
 	}
 	public List getSeen(){

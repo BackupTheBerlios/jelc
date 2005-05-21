@@ -43,10 +43,8 @@ Vector  list;
 			}
 			return false;
 		}
-		else{
-			System.err.println("bad file: "+f.getName());
-			return false;
-		}
+		System.err.println("bad file: "+f.getName());
+		return false;
 	}
 	public boolean found(String name){
 		//sort();

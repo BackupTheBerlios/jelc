@@ -32,7 +32,7 @@ long updateTime=150000;
 		}
 		return (new Date().getTime()-lastUpdate.getTime()>updateTime);
 	}
-	public  boolean load(){
+	public synchronized boolean load(){
 		boolean sucsess =false;
 		for(int i=0;!sucsess&&(i<5);i++){
 
@@ -111,7 +111,7 @@ long updateTime=150000;
 	}
 	public Player findIn(String tmp){
 		for(int i=0;i<players.size();i++){
-			if(((Player)players.get(i)).name.equals(tmp)){
+			if(((Player)players.get(i)).name.equalsIgnoreCase(tmp)){
 				return (Player)players.get(i);
 			}
 		}
@@ -142,7 +142,6 @@ long updateTime=150000;
 		load();
 		if(mask!=null){
 			Vector tmp=new Vector();
-			Vector offline=new Vector();
 			for(int i=0;i<mask.size();i++){
 				Player player=findIn((String)mask.get(i));
 				if(player!=null){
@@ -152,15 +151,12 @@ long updateTime=150000;
 			}	
 			return tmp;
 		}
-		else{
-			return players;
-		}
+		return players;
 	}
 	public Vector getOffline(List mask){
 		load();
 		if(mask!=null){
 			Vector tmp=new Vector();
-			Vector offline=new Vector();
 			for(int i=0;i<mask.size();i++){
 				Player player=findIn((String)mask.get(i));
 				if(player==null){
@@ -169,9 +165,7 @@ long updateTime=150000;
 			}
 			return tmp;
 		}
-		else{
-			return players;
-		}
+		return players;
 	}
 	public String toString(){
 		return ("All players Online");

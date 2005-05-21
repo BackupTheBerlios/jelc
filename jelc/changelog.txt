@@ -1,3 +1,44 @@
+(nidan) 21/5/2005
+* this is a merge of nidan's contributions from his bot gambler. so tradeing and a fiew other things are now working.
+- onHereYourInventory(Packet p) (private) will reciece the packet to process your inventory
+- onHereYourInventory(Item[] items) should be used to recieve the inventory recieved event
+- onGetPartialStat(Packet p)
+- onTradeAccept(Packet p)
+- onGetYourTradeObjects(Packet p)
+- onGetTradeObject(Packet p)
+- onGetTradeExit()
+- tradeWith(Actor partner)
+- putObjectOnTrade(int pos, int quant)
+- removeObjectFromTrade(int pos, int quant)
+- acceptTrade()  call to accept trades
+- abortTrade() call to cancel trades
+- askForInv() call to get inventory sent  
+- moveInv(int firstpos,int secondpos) call to move inventory around
+- useItem(int pos) call to use inventory items
+- attack(int target, double x, double y)  call to attack the person
+- moveTo(double x, double y) call to move around
+- call to pick up items from bag pickup(int pos, int quantity)
+- drop(int pos, int quantity) call to drop items
+- harvest(int id) call to harvest the item    
+- onRemoveTradeObject(Packet msg) called when a trade item is removed
+- onGetTradeReject(Packet msg) called when the trade is rejected
+
+
+
+(dns) 21/6/2005
+my changes:
+* Client no longer extends Thread, instead it implements runnable, this is to make dealing with threads a little easyer.
+- start() now calls connect()
+- connect() sets up the connection and spawns the threads that deal with the client
+-reconnect() is called when a connection is lost and should reconnect correctly
+also did quite a bit of code cleanup. ie when a client laggs out it should  (hopefully) automatically reconnect
+
+
+(dns) 20/4/2005
++ created EnhancedActor and modified Actor a little
++ created ActorInterface for recieveing addActor addEnhancedActor and RemoveActor events
+
+
 (dns) 15/4/2005
 +altered the signature for onPmSent to: void onPmSent(String person, String message);
 +added public void onChangeMap(String map) for when you change maps

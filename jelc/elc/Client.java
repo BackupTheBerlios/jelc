@@ -13,7 +13,7 @@ import java.io.*;
  * @author frak
  *  
  */
-public abstract class Client extends Thread {
+public abstract class Client implements Runnable{
 	public final static String DEFAULT_ADRESS= "eternal-lands.solexine.fr";
 	public final static int DEFAULT_PORT= 2000;
     private Socket my_socket;
@@ -40,9 +40,13 @@ public abstract class Client extends Thread {
     LinkedList chatQueue=new LinkedList();
     LinkedList pmQueue=new LinkedList();
     
-    boolean running=true;
-    int runlevel;
-    public Client(String user, String pass) {
+	Item[] inventory;
+	//Timer timer
+	    
+	boolean running=true;
+	int runlevel;
+	Thread currentThread;
+	public Client(String user, String pass) {
         this.setUsername(user);
         this.setPassword(pass);
         this.actors = new Hashtable(20);
@@ -227,7 +231,6 @@ public abstract class Client extends Thread {
      */
     public void onAddNewEnhancedActor(EnhancedActor  a) {
     }
-    
     /**
      * to be overwritten by subclasses
      */
@@ -243,11 +246,177 @@ public abstract class Client extends Thread {
     public void onMinute(int time){
     	
     }
+    
+    private void onHereYourInventory(Packet p){
+    	int totalNumberOfItems = p.data.get();
+    	//System.out.println("total items: "+totalNumberOfItems);
+    	inventory = new Item[totalNumberOfItems];
+    	//System.out.println("here your inventory:");
+    	for(int i=0; i<totalNumberOfItems; i++)
+    	{
+    		int image = p.data.getShort(i*8+1);
+    		int quantity = p.data.getInt(i*8+3);
+    		int pos = p.data.get(i*8+7);
+    		int flags = p.data.get(i*8+8);
+    		Item it = new Item(image,quantity,pos,flags);
+    		//System.out.println(it);
+    		inventory[i]=it;
+    	}
+    	onHereYourInventory(inventory);
+    }
+    public void onHereYourInventory(Item[] items){
+    	
+    }
+    
+    public void onGetPartialStat(Packet p)
+    {
+    	
+    }
+       
+    public void onTradeAccept(Packet p){
+    	
+    }
+    
+    public void onGetYourTradeObjects(Packet p){
+    	
+    }
+    public void onGetTradeObject(Packet p){
+    	
+    }
+    public void onGetTradeExit(){
+    	//timer.cancel();
+    	
+    }
+    
+    public void tradeWith(Actor partner){
+    	/*timer = new Timer();
+    	TradeTimeOut task = new TradeTimeOut(this);
+    	timer.schedule(task,30000);*/
+    	
+    	//byte[] id = new byte[4];
+    	//Integer in = new Integer(partner.actor_id);
+    	//byte b = in.byteValue();
+    	//id[0]=b;
+    	//in.
+    	ByteBuffer b = ByteBuffer.allocate(4);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+        b.putShort((short)partner.actor_id);
+    	//System.out.println("trying to trade with id: "+new Integer(id[0]));
+    	send(Protocol.TRADE_WITH, b.array() ,5);//wrong
+    }
+    
+    public void putObjectOnTrade(int pos, int quant){
+    	ByteBuffer b = ByteBuffer.allocate(3);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)pos);
+    	b.putShort((short)quant);
+    	send(Protocol.PUT_OBJECT_ON_TRADE, b.array(),4);
+    }
+    
+    public void removeObjectFromTrade(int pos, int quant)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(3);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)pos);
+    	b.putShort((short)quant);
+    	send(Protocol.REMOVE_OBJECT_FROM_TRADE, b.array(),4);
+    }
+    
+    public void acceptTrade(){
+    	send(Protocol.ACCEPT_TRADE, null,1);
+    	try{Thread.sleep(500);}catch(Exception e){e.printStackTrace();}
+    	send(Protocol.SEND_MY_INVENTORY,null,1);
+    	//timer.cancel();
+    }
+    
+    public void abortTrade(){
+    	send(Protocol.EXIT_TRADE, null,1);
+    	//timer.cancel();
+    }
+    
+    public void askForInv()
+    {
+    	
+    	send(Protocol.SEND_MY_INVENTORY,null,1);
+    }
+    
+    public void moveInv(int firstpos,int secondpos)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(2);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)firstpos);
+    	b.put((byte)secondpos);
+    	send(Protocol.MOVE_INVENTORY_ITEM,b.array(),3);
+    	askForInv();
+    }
+    
+    public void useItem(int pos)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(1);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)pos);
+    	send(Protocol.USE_INVENTORY_ITEM,b.array(),2);
+    }
+    
+    public void attack(int target, double x, double y)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(4);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.putInt(target);
+    	send(Protocol.ATTACK_SOMEONE,b.array(),5);
+    }
+    
+    public void moveTo(double x, double y)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(4);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.putShort((short)x);
+    	b.putShort((short)y);
+    	send(Protocol.MOVE_TO,b.array(),5);
+    }
+    
+    public void pickup(int pos, int quantity)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(3);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)pos);
+    	b.putShort((short)quantity);
+    	send(Protocol.PICK_UP_ITEM,b.array(),4);
+    }
+    
+    public void drop(int pos, int quantity)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(3);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.put((byte)pos);
+    	b.putShort((short)quantity);
+    	send(Protocol.DROP_ITEM,b.array(),4);
+    }
+    
+    public void harvest(int id)
+    {
+    	ByteBuffer b = ByteBuffer.allocate(2);
+    	b.order(ByteOrder.LITTLE_ENDIAN);
+    	b.putShort((short)id);
+    	send(Protocol.HARVEST,b.array(),3);
+    }
+    
+    public void onRemoveTradeObject(Packet msg){
+    	
+    }
+    
+    public void onGetTradeReject(Packet msg){
+    	
+    }
     public void onChangeMap(String map){
     	
     }
 
-    private void send(int protocol, byte[] data, int len) { 
+    public void onAddActorCommand(Packet msg){
+    	//System.out.println(msg.dump());
+    }
+
+    private void send(int protocol, byte[] data, int len) {
     	ByteBuffer b = ByteBuffer.allocate(len+2);
     	b.order(ByteOrder.LITTLE_ENDIAN);
     	b.put((byte)protocol);
@@ -257,25 +426,30 @@ public abstract class Client extends Thread {
         try {
             this.out.write(b.array());
         } catch (IOException e) {
-            //e.printStackTrace();
-        	if (!my_socket.isClosed()){
-        		
-        		Connect();
-        	}            
+            System.err.println("error: "+e.getMessage());
+            this.reconnect();
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
 
     private void send(byte[] b) {
+    	if (my_socket.isClosed()){
+    		connect();
+    	}
         try {
             this.out.write(b);
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (IOException e) {
+            System.err.println("error: "+e.getMessage());
+            this.reconnect();
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
 
 	private void send(Packet p) {
+    	if (my_socket.isClosed()){
+    		connect();
+    	}
 		try {
 			ByteBuffer b = ByteBuffer.allocate(p.length + 2);
 			b.order(ByteOrder.LITTLE_ENDIAN);
@@ -285,10 +459,8 @@ public abstract class Client extends Thread {
         		b.put(p.data);
         	this.out.write(b.array());
         } catch (IOException e) {
-            //e.printStackTrace();
-        	if (!my_socket.isClosed()){
-        		Connect();
-        	}
+        	System.err.println("error: "+e.getMessage());
+            this.reconnect();
         }
         this.last_heartbeat = System.currentTimeMillis();
     }
@@ -308,6 +480,9 @@ public abstract class Client extends Thread {
     }
 
     private void check_heartbeat() {
+    	if (my_socket.isClosed()){
+    		connect();
+    	} 
     	if (System.currentTimeMillis() - this.last_heartbeat  > 5000) {
             this.last_heartbeat = System.currentTimeMillis();
             send(new Packet(Protocol.HEART_BEAT, null, 1));
@@ -337,12 +512,15 @@ public abstract class Client extends Thread {
     }
 
     private Packet poll() {
+        if(my_socket.isClosed()){
+        	connect();
+        }
         Packet msg;
         int p = 0;
         int l = 0;
-        byte[] d = new byte[2048];
-        try {
-            if (this.in.available() > 3) {
+        byte[] d = new byte[2048];        
+        try {	
+            if ((this.in.available() > 3)) {
                 p = this.in.readUnsignedByte();
                 l = this.in.readUnsignedByte();
                 l += this.in.readUnsignedByte() << 8;
@@ -351,8 +529,9 @@ public abstract class Client extends Thread {
                 msg = new Packet(p, d, l - 1);
                 return msg;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        catch (IOException e) {
+        	e.printStackTrace();
         }
         return null;
     }
@@ -363,7 +542,7 @@ public abstract class Client extends Thread {
     	send(new Packet(Protocol.SEND_ME_MY_ACTORS, null, 1));
     }
     
-    public boolean Connect(){
+    public boolean connect(){
         runlevel = 0;
     	try {
     		if(my_socket!=null){
@@ -372,6 +551,8 @@ public abstract class Client extends Thread {
     		this.my_socket = new Socket(server, port);
     		this.in = new DataInputStream(my_socket.getInputStream());
     		this.out = new DataOutputStream(my_socket.getOutputStream());
+    		currentThread=new Thread(this);
+    		currentThread.start();
     		return true;
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -381,15 +562,25 @@ public abstract class Client extends Thread {
         	return false;
         }
     }
-    
+    public boolean reconnect(){
+    	System.out.println("Reconnecting...");
+    	running=false;
+    	try {
+		
+    		Thread.sleep(500);//delay a little to hopefully get around bad network connections
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	
+    	return connect();
+    }
     
     public void run() {
         Packet msg;
         Actor actor;
         EnhancedActor enhancedActor;
-        Connect();
         this.last_heartbeat = System.currentTimeMillis();
-
+        running=true;
         while (running) {
             if (this.my_socket.isConnected()) {
                 msg = poll();
@@ -446,17 +637,38 @@ public abstract class Client extends Thread {
                     case Protocol.YOU_DONT_EXIST:
                     	onLoginNotExist();
                     	break;
+                    case Protocol.HERE_YOUR_INVENTORY:
+                    	onHereYourInventory(msg);
+                    	break;
+                    case Protocol.GET_TRADE_ACCEPT:
+                    	onTradeAccept(msg);
+                    case Protocol.GET_TRADE_OBJECT:
+                    	onGetTradeObject(msg);
+                    case Protocol.REMOVE_TRADE_OBJECT:
+                    	onRemoveTradeObject(msg);
+                    case Protocol.GET_YOUR_TRADEOBJECTS:
+                    	onGetYourTradeObjects(msg);
+                    case Protocol.GET_TRADE_REJECT:
+                    	onGetTradeReject(msg);
+                    case Protocol.GET_TRADE_EXIT:
+                    	onGetTradeExit();
+                    case Protocol.SEND_PARTIAL_STAT:
+                    	onGetPartialStat(msg);
+                    case Protocol.ADD_ACTOR_COMMAND:
+                    	onAddActorCommand(msg);
                     default:
                         onUnknowPacket(msg);
                         break;
                     }
                 }
-                check_heartbeat();
-            	sendChat();
-                onLoop();
+                if(running){//incase the above crashed
+                	check_heartbeat();
+                	sendChat();
+                	onLoop();
+                }
             }
             try {
-                sleep(100);
+                Thread.sleep(100);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
@@ -623,5 +835,8 @@ public abstract class Client extends Thread {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+	}
+	public void start(){//might as well put this as legacy as it used to expose the thread connect spawns a new thread now
+		connect();
 	}
 }

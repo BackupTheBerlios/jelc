@@ -255,9 +255,7 @@ boolean updated=false;
 		if(isOnline()){
 			return name;
 		}
-		else{
-			return name+" (Offline)";
-		}
+		return name+" (Offline)";
 	}
 	/**
 	 * converts physique to an integer and returns

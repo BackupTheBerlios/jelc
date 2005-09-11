@@ -6,6 +6,8 @@
  */
 package elc;
 
+import elc.Packet;
+
 /**
  * @author dns
  *

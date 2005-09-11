@@ -17,6 +17,11 @@ public class Item {
     	this.quantity=quantity;
     	this.position=pos;
     }
+    public Item(int imageID, int quantity){
+    	this.imageID=imageID;
+    	this.quantity=quantity;
+    }
+    
 
     
     public String toString(){

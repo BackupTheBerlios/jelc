@@ -6,6 +6,7 @@ package elc;
 import java.io.*;
 import java.util.Enumeration;
 
+
 /**
  * @author frak
  * A simple Client as example and test.

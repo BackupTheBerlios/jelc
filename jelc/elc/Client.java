@@ -280,9 +280,31 @@ public abstract class Client implements Runnable{
     public void onGetYourTradeObjects(Packet p){
     	
     }
-    public void onGetTradeObject(Packet p){
+    private void onGetTradeObject(Packet p){
+    	System.out.println("|"+p.protocol+"|"+p.length+"|"+p.dump());
+		int image = p.data.getShort();
+		System.out.println(image);
+		int quantity = p.data.getInt(2);
+		System.out.println(quantity);
+		Item item=new Item(image,quantity);
+    	if(p.data.array().length>7){
+	    	if(p.data.get(7)==1){//other has put object on trade{
+	    		onAddTradeObject(item,false);
+	    	}
+	    	else{
+	    		onAddTradeObject(item,true);
+	    	}
+    	}
+    }
+    
+    public void onAddTradeObject(Item item,boolean you){
     	
     }
+    public void onRemoveTradeObject(Packet msg){
+
+    }
+
+    
     public void onGetTradeExit(){
     	//timer.cancel();
     	
@@ -401,9 +423,6 @@ public abstract class Client implements Runnable{
     	send(Protocol.HARVEST,b.array(),3);
     }
     
-    public void onRemoveTradeObject(Packet msg){
-    	
-    }
     
     public void onGetTradeReject(Packet msg){
     	
@@ -415,7 +434,12 @@ public abstract class Client implements Runnable{
     public void onAddActorCommand(Packet msg){
     	//System.out.println(msg.dump());
     }
-
+    public void addBuddy(String name, int type){
+    	
+    }
+    public void removeBuddy(String name){
+    	
+    }
     private void send(int protocol, byte[] data, int len) {
     	ByteBuffer b = ByteBuffer.allocate(len+2);
     	b.order(ByteOrder.LITTLE_ENDIAN);
@@ -557,8 +581,13 @@ public abstract class Client implements Runnable{
         } catch (UnknownHostException e) {
             e.printStackTrace();
             return false;
+        }catch (SocketException e){
+        	e.printStackTrace();
+        	running=false;        	
+        	return false;
         } catch (IOException e) {
         	e.printStackTrace();
+        	running=false;
         	return false;
         }
     }
@@ -571,8 +600,18 @@ public abstract class Client implements Runnable{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-    	
-    	return connect();
+		while(!running){
+	    	if(connect()){
+	    		running=true;
+	    		return true;
+	    	}
+			try{
+				Thread.sleep(500);//delay a little to hopefully get around bad network connections
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    	}
+		return false;
     }
     
     public void run() {
@@ -581,97 +620,134 @@ public abstract class Client implements Runnable{
         EnhancedActor enhancedActor;
         this.last_heartbeat = System.currentTimeMillis();
         running=true;
-        while (running) {
-            if (this.my_socket.isConnected()) {
-                msg = poll();
-                switch (runlevel) {
-                case 2:
-                    send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
-                    runlevel++;
-                    break;
-                case 8:
-                    login();
-                    runlevel++;
-                    break;
-                default:
-                    if (runlevel < 1000)
-                        runlevel++;
-                    break;
-                }
-                if (msg != null) {
-                    switch (msg.protocol) {
-                    case Protocol.RAW_TEXT:
-                    	processChat(new String(msg.data.array(), 1, msg.length - 1));
-                        break;
-                    case Protocol.ADD_NEW_ACTOR:
-                        actor = new Actor(msg);
-                     	actors.put(new Integer(actor.actor_id),actor);
-                        onAddNewActor(actor);
-                        break;
-                    case Protocol.ADD_NEW_ENHANCED_ACTOR:
-                    	enhancedActor=new EnhancedActor(msg);
-                    	actors.put(new Integer(enhancedActor.actor_id),enhancedActor);
-                    	this.onAddNewEnhancedActor(enhancedActor);
-                    	break;
-                    case Protocol.REMOVE_ACTOR:
-                        //actors.remove(msg.data.getShort());
-                    	actor=(Actor)actors.remove(new Integer(msg.data.getShort()));
-                        onRemoveActor(actor);
-                        break;
-                    case Protocol.CHANGE_MAP:
-                    	map=new String(msg.getBytes());
-                    	map=map.substring(0,map.length()-1);
-                    	onChangeMap(map);
-                    	//System.out.println(map);
-                        break;
-                    case Protocol.NEW_MINUTE:
-                    	time=msg.data.getShort();
-                        onMinute(time);
-                    	break;
-                    case Protocol.LOG_IN_OK:
-                    	onLogin();
-                    	break;
-                    case Protocol.LOG_IN_NOT_OK:
-                    	onNoLogin();
-                    	break;
-                    case Protocol.YOU_DONT_EXIST:
-                    	onLoginNotExist();
-                    	break;
-                    case Protocol.HERE_YOUR_INVENTORY:
-                    	onHereYourInventory(msg);
-                    	break;
-                    case Protocol.GET_TRADE_ACCEPT:
-                    	onTradeAccept(msg);
-                    case Protocol.GET_TRADE_OBJECT:
-                    	onGetTradeObject(msg);
-                    case Protocol.REMOVE_TRADE_OBJECT:
-                    	onRemoveTradeObject(msg);
-                    case Protocol.GET_YOUR_TRADEOBJECTS:
-                    	onGetYourTradeObjects(msg);
-                    case Protocol.GET_TRADE_REJECT:
-                    	onGetTradeReject(msg);
-                    case Protocol.GET_TRADE_EXIT:
-                    	onGetTradeExit();
-                    case Protocol.SEND_PARTIAL_STAT:
-                    	onGetPartialStat(msg);
-                    case Protocol.ADD_ACTOR_COMMAND:
-                    	onAddActorCommand(msg);
-                    default:
-                        onUnknowPacket(msg);
-                        break;
-                    }
-                }
-                if(running){//incase the above crashed
-                	check_heartbeat();
-                	sendChat();
-                	onLoop();
-                }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
+        try{
+	        while (running) {
+	            if (this.my_socket.isConnected()) {
+	                msg = poll();
+	                switch (runlevel) {
+	                case 2:
+	                    send(new Packet(Protocol.SEND_OPENING_SCREEN, null, 1));
+	                    runlevel++;
+	                    break;
+	                case 8:
+	                    login();
+	                    runlevel++;
+	                    break;
+	                default:
+	                    if (runlevel < 1000)
+	                        runlevel++;
+	                    break;
+	                }
+	                if (msg != null) {
+	                    switch (msg.protocol) {
+	                    case Protocol.RAW_TEXT:
+	                    	processChat(new String(msg.data.array(), 1, msg.length - 1));
+	                        break;
+	                    case Protocol.ADD_NEW_ACTOR:
+	                        actor = new Actor(msg);
+	                     	actors.put(new Integer(actor.actor_id),actor);
+	                        onAddNewActor(actor);
+	                        break;
+	                    case Protocol.ADD_NEW_ENHANCED_ACTOR:
+	                    	enhancedActor=new EnhancedActor(msg);
+	                    	actors.put(new Integer(enhancedActor.actor_id),enhancedActor);
+	                    	this.onAddNewEnhancedActor(enhancedActor);
+	                    	break;
+	                    case Protocol.REMOVE_ACTOR:
+	                        //actors.remove(msg.data.getShort());
+	                    	actor=(Actor)actors.remove(new Integer(msg.data.getShort()));
+	                        onRemoveActor(actor);
+	                        break;
+	                    case Protocol.CHANGE_MAP:
+	                    	map=new String(msg.getBytes());
+	                    	map=map.substring(0,map.length()-1);
+	                    	onChangeMap(map);
+	                    	//System.out.println(map);
+	                        break;
+	                    case Protocol.NEW_MINUTE:
+	                    	time=msg.data.getShort();
+	                        onMinute(time);
+	                    	break;
+	                    case Protocol.LOG_IN_OK:
+	                    	onLogin();
+	                    	break;
+	                    case Protocol.LOG_IN_NOT_OK:
+	                    	onNoLogin();
+	                    	break;
+	                    case Protocol.YOU_DONT_EXIST:
+	                    	onLoginNotExist();
+	                    	break;
+	                    case Protocol.HERE_YOUR_INVENTORY:
+	                    	onHereYourInventory(msg);
+	                    	break;
+	                    case Protocol.GET_TRADE_ACCEPT:
+	                    	onTradeAccept(msg);
+	                    	break;
+	                    case Protocol.REMOVE_TRADE_OBJECT:
+	                    	onRemoveTradeObject(msg);
+	                    	break;
+	                    case Protocol.GET_TRADE_OBJECT:
+	                    	onGetTradeObject(msg);
+	                    	break;
+	                    case Protocol.GET_YOUR_TRADEOBJECTS:
+	                    	onGetYourTradeObjects(msg);
+	                    	break;
+	                    case Protocol.GET_TRADE_REJECT:
+	                    	onGetTradeReject(msg);
+	                    	break;
+	                    case Protocol.GET_TRADE_EXIT:
+	                    	onGetTradeExit();
+	                    	break;
+	                    case Protocol.SEND_PARTIAL_STAT:
+	                    	onGetPartialStat(msg);
+	                    	break;
+	                    case Protocol.ADD_ACTOR_COMMAND:
+	                    	onAddActorCommand(msg);
+	                    	break;
+	                    case Protocol.BUDDY_EVENT:
+	                    	int type=msg.data.getInt();
+	        				if(type==1){
+	        					int types=msg.data.getInt();
+	        					String s=new String();
+	        					char c=msg.data.getChar();
+	        					while(c!=0){
+	        						s=s+c;
+	        						c=msg.data.getChar();
+	        					}
+	        					//msg.data.asCharBuffer()
+	        					this.addBuddy(s,types);
+	        				}
+	        				else if(type==0){
+	        					String s=new String();
+	        					char c=msg.data.getChar();
+	        					while(c!=0){
+	        						s=s+c;
+	        						c=msg.data.getChar();
+	        					}
+	        					this.removeBuddy(s);
+	        				}
+	                    	break;
+	                    default:
+	                        onUnknowPacket(msg);
+	                        break;
+	                    }
+	                }
+	                if(running){//incase the above crashed
+	                	check_heartbeat();
+	                	sendChat();
+	                	onLoop();
+	                }
+	            }
+	            try {
+	                Thread.sleep(100);
+	            } catch (InterruptedException e1) {
+	                e1.printStackTrace();
+	            }
+	        }
+        }
+        catch(Exception e){
+        	System.err.println("Exception: "+e.getLocalizedMessage());
+        	e.printStackTrace();
         }
     }
     /**
@@ -754,7 +830,14 @@ public abstract class Client implements Runnable{
     		}
     		if(length!=text.length()){//found a :, it is a local chat
     			from=text.substring(0,length);
-    			message=text.substring(length+3,text.length());
+    			if(length+3<text.length()){
+    				//System.out.println("||"+text+"|"+from+"|"+(length+3)+" "+text.length());
+    				
+    				message=text.substring(length+3,text.length());
+    			}
+    			else{
+    				message=new String();
+    			}
     			onChat(from, message);
     		}
     		else{//hasnt identified the type at all, so it is something else

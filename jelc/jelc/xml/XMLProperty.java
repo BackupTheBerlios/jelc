@@ -1,5 +1,7 @@
 package jelc.xml;
 
+import org.apache.xerces.dom.CoreDocumentImpl;
+
 /**
  * The Class implementing this interface is basically representing an XML document.
  * A class that does so, holds one simple property: A String[] of XPath queries relevant to a particular XML document
@@ -10,10 +12,7 @@ package jelc.xml;
  */
 public interface XMLProperty {
 
-        /**
-         * Returns a String[] of XPath queries relevant to the particular object.
-         *
-         * @returns String[] - containing String's of XPath queries for the particular object
-         */
-        public String[] getXPathQueries();
+        public void parse( CoreDocumentImpl doc );
+        
+        public void parse( String doc );
 }

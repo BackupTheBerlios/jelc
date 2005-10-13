@@ -158,6 +158,7 @@ public abstract class Client implements Runnable{
      */
     private void doChat(String text){
     	send(Protocol.RAW_TEXT, text.getBytes(), text.length() + 1);
+    	System.out.println("sent|"+text+"|"+(text.length() + 1));
     }
     
     /**
@@ -178,7 +179,8 @@ public abstract class Client implements Runnable{
      * @param text
      */
     private void doChatPm(String text){
-    	send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+    	//send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length());
+    	send(Protocol.SEND_PM, text.substring(1).getBytes(), text.length()+1);
     }
     
     /**
@@ -196,8 +198,12 @@ public abstract class Client implements Runnable{
      * 
      * @param message  the message to send
      */
-    public void chatGm(String message){
-    	chat("#gm "+message);
+    public void chatGm(String text){
+    	chat("#gm "+text);
+    	
+    	//text="#gm "+text+'\0';
+    	System.out.println("|"+text+"|");
+    	//send(0, text.getBytes(), text.length()+1);
     }
     
     /**
@@ -207,7 +213,8 @@ public abstract class Client implements Runnable{
      * @param message
      */
     public void chatChannel(String message){
-    	 chat("@"+message);
+    	 //chat("@"+message);
+    	 
     }
     
     /**
@@ -677,7 +684,7 @@ public abstract class Client implements Runnable{
 	                    case Protocol.YOU_DONT_EXIST:
 	                    	onLoginNotExist();
 	                    	break;
-	                    case Protocol.HERE_YOUR_INVENTORY:
+	                    /*case Protocol.HERE_YOUR_INVENTORY:
 	                    	onHereYourInventory(msg);
 	                    	break;
 	                    case Protocol.GET_TRADE_ACCEPT:
@@ -697,7 +704,7 @@ public abstract class Client implements Runnable{
 	                    	break;
 	                    case Protocol.GET_TRADE_EXIT:
 	                    	onGetTradeExit();
-	                    	break;
+	                    	break;*/
 	                    case Protocol.SEND_PARTIAL_STAT:
 	                    	onGetPartialStat(msg);
 	                    	break;
@@ -755,6 +762,9 @@ public abstract class Client implements Runnable{
      * @param text
      */
     private void processChat(String text){
+    	byte in=(byte)text.charAt(0);
+    	//System.out.println("TYPE: "+in);
+    	text=text.substring(1);
     	onChat(text);
     	if (text.startsWith("[PM from ")){// for a pm message,
     		int length=8;
@@ -768,6 +778,7 @@ public abstract class Client implements Runnable{
     		from=text.substring(9,length);
     		message=text.substring(length+2,text.length()-1);
     		onPm(from, message);
+    		//System.out.println("GOT PM");
     	}
     	else if(text.startsWith("[PM to ")){// you sent a pm message
     		
@@ -785,7 +796,7 @@ public abstract class Client implements Runnable{
     		
     		String message=text.substring(length+2,text.length()-1);
     		onPmSent(to, message);
-    		
+    		//System.out.println("SENT PM");
     	}
     	else if(text.startsWith("[")){//must be a local chat
     		int length=0;
@@ -811,6 +822,7 @@ public abstract class Client implements Runnable{
     		}
     		from=text.substring(9,length);
     		message=text.substring(length+2,text.length());
+    		//System.out.println(from+"|"+message+"|");
     		onGm(from, message);
     	}
     	else if(text.startsWith("#Message from ")){//is a admin mesage

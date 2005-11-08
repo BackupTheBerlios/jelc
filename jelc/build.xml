@@ -8,9 +8,6 @@
     &buildfile;
     <path id='project.classpath'>
       <pathelement location='.'/>
-      <pathelement location='./xercesImpl.jar'/>
-      <pathelement location='./xml-apis.jar'/>
-      <pathelement location='./xalan.jar'/>
 </path>
     <target name='init'/>
     <target name='clean'/>

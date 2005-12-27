@@ -1,5 +1,7 @@
 package jelc.xml;
 
+import javax.xml.transform.TransformerException;
+
 import org.apache.xerces.dom.CoreDocumentImpl;
 
 /**
@@ -10,9 +12,9 @@ import org.apache.xerces.dom.CoreDocumentImpl;
  * @author Placid
  *
  */
-public interface XMLProperty {
+public interface XMLDocumentParser {
 
-        public void parse( CoreDocumentImpl doc );
+        public void parse( CoreDocumentImpl doc ) throws TransformerException;
         
-        public void parse( String doc );
+        public void parse( String doc ) throws TransformerException;
 }

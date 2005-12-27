@@ -1,8 +1,12 @@
 package jelc.xml;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import org.apache.xerces.dom.CoreDocumentImpl;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -13,7 +17,7 @@ public class RulesParser implements XMLDocumentParser {
 		public static final String XPATH_RULE = "./text/rule[%]/";
 	
 	
-		public void parse( CoreDocumentImpl doc ) throws TransformerException {
+		public void parse( Document doc ) throws TransformerException {
 			/*
 			 * Read the rules, and add each rule to the rules list
 			 * Using XPath, we can find the rules in the document 
@@ -48,8 +52,10 @@ public class RulesParser implements XMLDocumentParser {
 			}
 		}
 
-		public void parse( String doc ) {
-			
-			
+		public void parse( String doc ) throws ParserConfigurationException,TransformerException {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document xmlDoc = builder.newDocument();
+			parse( xmlDoc );
 		}
 }

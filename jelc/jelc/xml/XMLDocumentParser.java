@@ -1,8 +1,9 @@
 package jelc.xml;
 
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.apache.xerces.dom.CoreDocumentImpl;
+import org.w3c.dom.Document;
 
 /**
  * The Class implementing this interface is basically representing an XML document.
@@ -14,7 +15,7 @@ import org.apache.xerces.dom.CoreDocumentImpl;
  */
 public interface XMLDocumentParser {
 
-        public void parse( CoreDocumentImpl doc ) throws TransformerException;
+        public void parse( Document doc ) throws TransformerException;
         
-        public void parse( String doc ) throws TransformerException;
+        public void parse( String doc ) throws ParserConfigurationException,TransformerException;
 }

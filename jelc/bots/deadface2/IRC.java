@@ -23,7 +23,7 @@ import f00f.net.irc.martyr.commands.QuitCommand;
  *
  */
 public class IRC implements BotCommand{
-MyBot2 bot;
+	MyBot2 bot;
 	private IRCConnection connection;
 	private AutoReconnect autoReconnect;
 	private Channel mainChannel;
@@ -54,7 +54,7 @@ MyBot2 bot;
 
 		public MessageMonitor( IRCConnection con )
 		{
-			super( con);
+			super( con );
 
 			enable();
 		}

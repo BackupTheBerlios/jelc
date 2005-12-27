@@ -110,4 +110,13 @@ public class  PlayerList {
 	public String toString(){
 		return name;
 	}
+	
+	/**
+	 * Returns true if the list contains the given name 
+	 * @param name
+	 * @return
+	 */
+	public boolean containsName( String name ){
+		return list.contains( name );
+	}
 }

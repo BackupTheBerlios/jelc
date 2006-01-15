@@ -1,7 +1,11 @@
 package jelc.playerView;
 import java.io. BufferedReader;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,6 +30,9 @@ public class Player {
 	public final static int PLAYERDOESNOTEXIST=2;
 	public final static int PAGENOTFOUND=3;
 	public final static int IOEXCEPTION=4;
+	public final static int LOCKED=5;
+	public final static int EXCEPTION=6;//unknown exception (probly null pointer)
+	public final static int FILENTOFOUND=7;
 	
 public String name;
 //Main Attributes
@@ -70,14 +77,43 @@ boolean updated=false;
 	public Player(String name){
 		this.name=name;
 	}
-	int Parse(){
-		URL page;
-		try {
-			
-			page = new URL("http://eternal-lands.solexine.fr/~radu/view_user.php?user="+name);
-			URLConnection huc=page.openConnection();
+	public int Parse(){
+		try{
+			URL page = new URL("http://eternal-lands.solexine.fr/~radu/view_user.php?user="+name);
+			//page=new URL("file:///home/dns/view_user.php.html");
+			URLConnection con=page.openConnection();
 			//System.out.println(huc.getHeaderFields());
-			BufferedReader d = new BufferedReader(new InputStreamReader(huc.getInputStream()));
+			//BufferedReader d = new BufferedReader(new InputStreamReader(huc.getInputStream()));
+			return Parse(con.getInputStream());
+	
+		}
+		catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			System.err.println("A malformed URL Ecxception ocured :"+e.getMessage());
+			System.err.println("The likely cause of this is that the page name has changed");
+			return PAGENOTFOUND;
+		}
+		catch (IOException e1) {
+			// TODO Auto-generated catch block
+			// e1.printStackTrace();
+			System.err.println("An IO exception ocured:"+e1.getMessage());
+			System.err.println("This means that there was an error retrieveing the web page");	
+			return IOEXCEPTION;
+		}
+	}
+	public int Parse(File f){
+		try {
+			return Parse(new FileInputStream(f));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return FILENTOFOUND;
+		}
+	}
+	private int Parse(InputStream in){
+		BufferedReader d = new BufferedReader(new InputStreamReader(in));
+		try {
 
 			for(int i=0;i<5;i++){
 				d.readLine();
@@ -90,6 +126,11 @@ boolean updated=false;
 					privacy=true;
 					return PRIVACYON;
 				}
+				else if(tmp.equals("<tr><td colspan=1><b>This player did nasty things and is locked</b></td></tr>")){
+					return LOCKED;
+				}
+				//d.readLine();//skip next line
+				tmp=d.readLine();
 				System.out.println(tmp);
 				Physique=trim(tmp.substring(26));
 				tmp= d.readLine();
@@ -152,20 +193,17 @@ boolean updated=false;
 				return PARSEDOK;
 			}
 			return PLAYERDOESNOTEXIST;
-			
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			System.err.println("A malformed URL Ecxception ocured :"+e.getMessage());
-			System.err.println("The likely cause of this is that the page name has changed");
-			return PAGENOTFOUND;
 		}
-			catch (IOException e1) {
+		catch (IOException e1) {
 			// TODO Auto-generated catch block
-			//e1.printStackTrace();
-				System.err.println("An IO exception ocured:"+e1.getMessage());
-				System.err.println("This means that there was an error retrieveing the web page");	
+			// e1.printStackTrace();
+			System.err.println("An IO exception ocured:"+e1.getMessage());
+			System.err.println("This means that there was an error retrieveing the web page");	
 			return IOEXCEPTION;
+		}
+		catch(Exception e){
+			System.err.println("An UNKNOWN Exception ocured:"+e.getMessage());
+			return EXCEPTION;
 		}
 	}
 	
@@ -534,4 +572,17 @@ boolean updated=false;
 	public boolean hasPrivacy() {
 		return privacy;
 	}
+	
+	/*public static void  main (String [] args){
+		Player p=new Player("dns");
+		int status=p.Parse();
+		//System.out.println(status);
+		//System.out.println(p.dump());
+		
+		
+		
+		System.out.println(p.Physique+"|"+p.Coordination+"|"+p.Reasoning+"|"+p.Will+"|"+p.Instinct+"|"+p.Vitality);
+		System.out.println(p.Might+"|"+p.Matter+"|"+p.Toughness+"|"+p.Charm+"|"+p.Reaction+"|"+p.Rationality+"|"+p.Dexterity+"|"+p.Ethereality);
+		System.out.println(p.Overall+"|"+p.Attack+"|"+p.Defense+"|"+p.Magic+"|"+p.Harvest+"|"+p.Manufacture+"|"+p.Alchemy+"|"+p.Potion+"|"+p.Summoning+"|"+p.Crafting);
+	}*/
 }

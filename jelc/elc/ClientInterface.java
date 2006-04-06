@@ -73,4 +73,5 @@ public interface ClientInterface {
     public abstract void onSystemMessage(String message);
     
     public abstract void onMinute(int time);
+    public abstract void onIG(String message);
 }

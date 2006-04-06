@@ -149,4 +149,8 @@ JLabel timel;
 		String tmp=(time/60)+":"+(time%60);
 		timel.setText(tmp);
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -55,5 +55,11 @@ public class SimpleClient extends Client {
 
     }
 
+	@Override
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

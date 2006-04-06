@@ -746,7 +746,7 @@ public abstract class Client implements Runnable{
 	                }
 	            }
 	            try {
-	                Thread.sleep(100);
+	                Thread.sleep(80);
 	            } catch (InterruptedException e1) {
 	                e1.printStackTrace();
 	            }
@@ -824,6 +824,9 @@ public abstract class Client implements Runnable{
     		message=text.substring(length+2,text.length());
     		//System.out.println(from+"|"+message+"|");
     		onGm(from, message);
+    	}
+    	else if(text.startsWith("#Ig ")){
+    		this.onIG(text);
     	}
     	else if(text.startsWith("#Message from ")){//is a admin mesage
     		//
@@ -934,4 +937,5 @@ public abstract class Client implements Runnable{
 	public void start(){//might as well put this as legacy as it used to expose the thread connect spawns a new thread now
 		connect();
 	}
+	public abstract void onIG(String message);
 }

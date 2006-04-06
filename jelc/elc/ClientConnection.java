@@ -138,6 +138,12 @@ Vector actorInterfaces;
 			((ClientInterface)e.nextElement()).onSystemMessage(message);
 		}
 	}
+	public void onIG(String message){
+		Enumeration e=clients.elements();
+		while(e.hasMoreElements()){
+			((ClientInterface)e.nextElement()).onIG(message);
+		}
+	}
 	
 	public void onChangeMap(String map){
 		Enumeration e=systemInterfaces.elements();

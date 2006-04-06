@@ -32,7 +32,12 @@ public class Player {
 	public final static int IOEXCEPTION=4;
 	public final static int LOCKED=5;
 	public final static int EXCEPTION=6;//unknown exception (probly null pointer)
-	public final static int FILENTOFOUND=7;
+	public final static int FILENOTFOUND=7;
+	public final static int NOTLOADED=8;
+	public final static int NEEDSUPDATE=9;
+	public final static int INCACHE=10;
+	
+	
 	
 public String name;
 //Main Attributes
@@ -62,7 +67,7 @@ public String Alchemy;
 public String Potion;
 public String Summoning;
 public String Crafting;
-Date lastUpdate;
+//Date lastUpdate;
 //Brom's Ints :P
 public String combatLevel;
 public int react;
@@ -74,6 +79,10 @@ public int defense;
 
 private boolean privacy=false;
 boolean updated=false;
+int status=NOTLOADED;
+private float lastUpdate;
+
+
 	public Player(String name){
 		this.name=name;
 	}
@@ -84,7 +93,8 @@ boolean updated=false;
 			URLConnection con=page.openConnection();
 			//System.out.println(huc.getHeaderFields());
 			//BufferedReader d = new BufferedReader(new InputStreamReader(huc.getInputStream()));
-			return Parse(con.getInputStream());
+			status= Parse(con.getInputStream());
+			return status;
 	
 		}
 		catch (MalformedURLException e) {
@@ -92,23 +102,34 @@ boolean updated=false;
 			//e.printStackTrace();
 			System.err.println("A malformed URL Ecxception ocured :"+e.getMessage());
 			System.err.println("The likely cause of this is that the page name has changed");
-			return PAGENOTFOUND;
+			status= PAGENOTFOUND;
+			return status;
 		}
 		catch (IOException e1) {
 			// TODO Auto-generated catch block
 			// e1.printStackTrace();
 			System.err.println("An IO exception ocured:"+e1.getMessage());
 			System.err.println("This means that there was an error retrieveing the web page");	
-			return IOEXCEPTION;
+			status= IOEXCEPTION;
+			return status;
 		}
 	}
 	public int Parse(File f){
 		try {
-			return Parse(new FileInputStream(f));
+			if(f.exists()&&f.canRead()){
+				status= Parse(new FileInputStream(f));
+				if(status==PARSEDOK){
+					status=INCACHE;
+				}
+				return status;
+			}
+			status=FILENOTFOUND;
+			return status;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return FILENTOFOUND;
+			status= FILENOTFOUND;
+			return status;
 		}
 	}
 	private int Parse(InputStream in){
@@ -188,8 +209,6 @@ boolean updated=false;
 				d.close();
 				
 				//System.out.println(dump());
-				lastUpdate=new Date();
-				updated=true;
 				return PARSEDOK;
 			}
 			return PLAYERDOESNOTEXIST;
@@ -242,10 +261,17 @@ boolean updated=false;
 		}
 		if(tmp.length()==4){
 			str = tmp.substring(2,4);
+			if(str.startsWith("/")){// could be 9/10 or 10/9   (potion bug)
+				str=str.substring(1);
+			}
+			
 			return Integer.parseInt(str);
 		}
 		else if(tmp.length()==6){//same for 99/100
 			str = tmp.substring(3,6);
+			if(str.startsWith("/")){
+				str=str.substring(1);
+			}
 			return Integer.parseInt(str);
 		}
 		else{
@@ -253,34 +279,34 @@ boolean updated=false;
 		}//could be an uneven number eg 9/10 (haven't used pp's)
 	}
 	public String dump(){
-		String tmp="Name: "+name+"\n";
+		String tmp="Name: "+"\n";
 		tmp=tmp+"Main Attributes\n";
-		tmp=tmp+"Physique: "+Physique+"\n";
-		tmp=tmp+"Coordination: "+Coordination+"\n";
-		tmp=tmp+"Reasoning: "+Reasoning+"\n";
-		tmp=tmp+"Will: "+Will+"\n";
-		tmp=tmp+"Instinct: "+Instinct+"\n";
-		tmp=tmp+"Vitality: "+Vitality+"\n";
+		tmp=tmp+"Physique: "+getPhysique()+"\n";
+		tmp=tmp+"Coordination: "+getCoordination()+"\n";
+		tmp=tmp+"Reasoning: "+getReasoning()+"\n";
+		tmp=tmp+"Will: "+getWill()+"\n";
+		tmp=tmp+"Instinct: "+getInstinct()+"\n";
+		tmp=tmp+"Vitality: "+getVitality()+"\n";
 		tmp=tmp+"Cross Attributes\n";
-		tmp=tmp+"Might: "+Might+"\n";
-		tmp=tmp+"Matter: "+Matter+"\n";
-		tmp=tmp+"Toughness: "+Toughness+"\n";
-		tmp=tmp+"Charm: "+Charm+"\n";
-		tmp=tmp+"Reaction: "+Reaction+"\n";
-		tmp=tmp+"Rationality: "+Rationality+"\n";
-		tmp=tmp+"Dexterity: "+Dexterity+"\n";
-		tmp=tmp+"Ethereality: "+Ethereality+"\n";
+		tmp=tmp+"Might: "+getMight()+"\n";
+		tmp=tmp+"Matter: "+getMatter()+"\n";
+		tmp=tmp+"Toughness: "+getToughness()+"\n";
+		tmp=tmp+"Charm: "+getCharm()+"\n";
+		tmp=tmp+"Reaction: "+getReaction()+"\n";
+		tmp=tmp+"Rationality: "+getRationality()+"\n";
+		tmp=tmp+"Dexterity: "+getDexterity()+"\n";
+		tmp=tmp+"Ethereality: "+getEthereality()+"\n";
 		tmp=tmp+"Skills\n";
-		tmp=tmp+"Attack: "+Attack+"\n";
-		tmp=tmp+"Defense: "+Defense+"\n";
-		tmp=tmp+"Magic: "+Magic+"\n";
-		tmp=tmp+"Harvest: "+Harvest+"\n";
-		tmp=tmp+"Manufacture: "+Manufacture+"\n";
-		tmp=tmp+"Alchemy: "+Alchemy+"\n";
-		tmp=tmp+"Potion: "+Potion+"\n";
-		tmp=tmp+"Summoning: "+Summoning+"\n";
-		tmp=tmp+"Crafting: "+Crafting+"\n";
-		tmp=tmp+"Overall: "+Overall+"\n";		
+		tmp=tmp+"Attack: "+getAttack()+"\n";
+		tmp=tmp+"Defense: "+getDefense()+"\n";
+		tmp=tmp+"Magic: "+getMagic()+"\n";
+		tmp=tmp+"Harvest: "+getHarvest()+"\n";
+		tmp=tmp+"Manufacture: "+getManufacture()+"\n";
+		tmp=tmp+"Alchemy: "+getAlchemy()+"\n";
+		tmp=tmp+"Potion: "+getPotion()+"\n";
+		tmp=tmp+"Summoning: "+getSummoning()+"\n";
+		tmp=tmp+"Crafting: "+getCrafting()+"\n";
+		tmp=tmp+"Overall: "+getOverall()+"\n";		
 		return tmp;
 	}
 
@@ -539,9 +565,9 @@ boolean updated=false;
 		return 	(getReaction()+getToughness()+getDexterity()+(getAttack()*.75)+(getDefense()*.75)+(getMatter()*.50));
 	}
 	
-	public boolean updated(){
+	/*public boolean updated(){
 		return updated;
-	}
+	}*/
 	/**
 	 * this calculates the carry capacity and returns the result
 	 * 
@@ -572,17 +598,32 @@ boolean updated=false;
 	public boolean hasPrivacy() {
 		return privacy;
 	}
+	/**
+	 * @return Returns the lastUpdate.
+	 */
+	public float getLastUpdate() {
+		return lastUpdate;
+	}
+	
+	public boolean needsUpdate(){
+		return true;
+	}
+	public int getStatus(){
+		return status;
+	}
+	
 	
 	/*public static void  main (String [] args){
 		Player p=new Player("dns");
-		int status=p.Parse();
-		//System.out.println(status);
-		//System.out.println(p.dump());
+		int status=p.Parse(new File("view_user.php"));
+		System.out.println(status);
+		System.out.println(p.dump());
 		
 		
 		
 		System.out.println(p.Physique+"|"+p.Coordination+"|"+p.Reasoning+"|"+p.Will+"|"+p.Instinct+"|"+p.Vitality);
 		System.out.println(p.Might+"|"+p.Matter+"|"+p.Toughness+"|"+p.Charm+"|"+p.Reaction+"|"+p.Rationality+"|"+p.Dexterity+"|"+p.Ethereality);
 		System.out.println(p.Overall+"|"+p.Attack+"|"+p.Defense+"|"+p.Magic+"|"+p.Harvest+"|"+p.Manufacture+"|"+p.Alchemy+"|"+p.Potion+"|"+p.Summoning+"|"+p.Crafting);
+		
 	}*/
 }

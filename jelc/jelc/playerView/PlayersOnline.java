@@ -9,7 +9,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-import playerView.Gui;
 /**
  * @author me
  *
@@ -22,12 +21,13 @@ public class PlayersOnline{
 	public final static int IOEXCEPTION=2;
 private Vector<String> players;
 private long lastUpdated;
-private long cacheTime=5000;
+private long cacheTime=50000;
 
-PlayersOnline online;
+static PlayersOnline online;
 
 	private PlayersOnline(){
 		setPlayers(new Vector());
+		//parse();
 	}
 	/**
 	 * Parse the online page ignoreing if it has it in cache
@@ -153,24 +153,24 @@ PlayersOnline online;
 			return tmp;
 		}
 		return players;
-	}
+	}*/
 
-	public Vector getOnline(List mask){
-		load();
-		if(mask!=null){
-			Vector tmp=new Vector();
-			for(int i=0;i<mask.size();i++){
-				Player player=findIn((String)mask.get(i));
-				if(player!=null){
-					tmp.add(player);
-				}
-	
-			}	
-			return tmp;
+	public Vector<String> getOnline(List mask){
+		if(needsUpdate()){
+			parse();
 		}
-		return players;
+		Vector<String> res=new Vector();
+		for(Iterator itr=mask.iterator();itr.hasNext();){
+			String name=itr.next().toString();
+			if(players.contains(name)){
+				res.add(name);
+			}
+		}
+		
+		
+		return res;
 	}
-	public Vector getOffline(List mask){
+	/*public Vector getOffline(List mask){
 		load();
 		if(mask!=null){
 			Vector tmp=new Vector();
@@ -204,7 +204,7 @@ PlayersOnline online;
 		return lastUpdated;
 	}
 	
-	PlayersOnline getInstance(){
+	public static PlayersOnline getInstance(){
 		if(online==null){
 			online=new PlayersOnline();
 		}
@@ -243,10 +243,14 @@ PlayersOnline online;
 	 * @return a list of players currently online 
 	 */
 	public Vector<String> parseOnline(){
-		if((getLastUpdated()+getCacheTime())>System.currentTimeMillis()){
+		if(needsUpdate()){
 			parse();
 		}
 		return players;
+	}
+	public boolean needsUpdate(){
+		//System.out.println("LAST: "+getLastUpdated()+" CACHE TIME: "+getCacheTime()+" CURRENTTIME: "+System.currentTimeMillis()+": "+(System.currentTimeMillis()-getLastUpdated()));
+		return(System.currentTimeMillis()-getLastUpdated())>getCacheTime();
 	}
 }
  

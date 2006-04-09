@@ -1,0 +1,28 @@
+CREATE TABLE account(name varchar( 30 ), guild varchar( 4 ), flags int, joker int, lastSeen DATE, lastOnline DATE, credits int);
+CREATE TABLE irc(name varchar(30),nick varchar(40));
+CREATE TABLE friend(name varchar(30),friend varchar(30))
+
+ALTER TABLE `account` ADD `unreadMessages` BINARY NOT NULL ,ADD `mailEnabled` BINARY NOT NULL ,ADD `banned` BINARY NOT NULL ,ADD `bot` BINARY NOT NULL ,ADD `admin` BINARY NOT NULL ;
+
+ALTER TABLE `account` ADD PRIMARY KEY ( `name` ) ;
+
+
+ALTER TABLE `account` ADD `newsTold` BOOL NOT NULL ;
+
+
+
+CREATE TABLE account(name varchar( 30 ) PRIMARY KEY, guild varchar( 4 ), joker int, lastSeen DATE, lastOnline DATE, credits int, `unreadMessages` BINARY NOT NULL , `mailEnabled` BINARY NOT NULL , `banned` BINARY NOT NULL , `bot` BINARY NOT NULL ,`admin` BINARY NOT NULL,`newsTold` BOOL NOT NULL);
+
+CREATE TABLE botprice(name varchar( 30 ),id int, price int);
+
+
+
+
+
+
+
+ALTER TABLE `account` ADD `moderator` BINARY NOT NULL DEFAULT '0';
+
+ALTER TABLE `account`
+  DROP `lastSeen`,
+  DROP `lastOnline`;

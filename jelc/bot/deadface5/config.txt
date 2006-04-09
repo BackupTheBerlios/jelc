@@ -1,0 +1,43 @@
+# Your game username
+USERNAME:name
+# your game password
+PASSWORD:pass
+# The hostname of the server
+HOSTNAME:eternal-lands.network-studio.com
+# the port of the server 2001 is the test server, 2000 is main
+PORT:2000
+#database connection String, for mysql you should remember to put mysql-version.jar in your classpath
+DBCLASSNAME:com.mysql.jdbc.Driver
+# database connection string, this is for a mysql database but would be different (and might work) for other database structures
+DB:jdbc:mysql://localhost/DBNAME?user=USERNAME&password=PASSWORD
+# your guild tag, used for guild permissions
+MYGUILD:LNX
+# the news item, people are told this when they first use the bot so put news of updates etc here
+NEWS:This is a new news item
+# prefixes for #gm and irc, you can: #gm d, command
+PREFIX:d,
+PREFIX:dead,
+PREFIX:deadface,
+# this is a list of things that will be passed through unedited, used so it can pass through unedited strings ie not add #gm (name) message
+# this is relevent for our guild where we have several bots, people can use the irc bridge and access the other bots
+PASSTHROUGH:t,
+
+
+#IRC stuff
+# is it enabled? use this to turn it off or comment it out of MyBot
+IRCENABLED:true
+# the nickname of the bot
+IRCNICK:nick
+# the name of the bot
+IRCNAME:name
+# the password to send to nickserv (if applicable)
+IRCPASS:
+# the host of the irc server
+IRCHOST:irc.freenode.net
+# the port of the irc server
+#IRCPORT:6667
+# a channel, ether just '#chan' or '#chan password', include as many channels as you want him to listen to
+IRCCHANNEL:#channel
+IRCCHANNEL:#chan password
+
+

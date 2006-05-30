@@ -661,7 +661,7 @@ public class Protocol {
     public static final byte attack_down_1 = 50;
 
     public static final byte attack_down_2 = 51;
-
+//////////////////////////////////////////////////////////////////////////////////////
     //to server commands
     public static final byte MOVE_TO = 1;
 
@@ -756,7 +756,7 @@ public class Protocol {
     public static final int LOG_IN = 140;
 
     public static final int CREATE_CHAR = 141;
-
+/////////////////////////////////////////////////////////////////////////////////////////////
     //to client commands
     public static final byte ADD_NEW_ACTOR = 1;
 

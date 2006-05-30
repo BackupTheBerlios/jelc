@@ -8,8 +8,9 @@ import java.io.IOException;
 import javax.swing.*;
 
 import jelc.Connection;
+import jelc.packet.Login;
 
-public class LoginDialog extends JDialog implements LoginListener, ActionListener {
+public class LoginDialog extends JDialog implements LoginManager, ActionListener {
 JButton login;
 JButton newAccount;
 JTextField username;
@@ -72,5 +73,9 @@ Connection c;
 		login.setVisible(true);
 		System.out.println("hihi");
 		
+	}
+	public Login showWelcome(String message) {
+		this.setVisible(true);
+		return null;
 	}
 }

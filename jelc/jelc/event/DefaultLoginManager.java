@@ -3,8 +3,9 @@ package jelc.event;
 import java.io.IOException;
 
 import jelc.Connection;
+import jelc.packet.Login;
 
-public class DefaultLoginManager implements LoginListener{
+public class DefaultLoginManager implements LoginManager{
 String username;
 String password;
 
@@ -14,13 +15,8 @@ String password;
 	}
 
 	
-	public void showWelcome(Connection c) {
-		try {
-			c.login(username, password);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public Login showWelcome( String message) {
+		return new Login(username, password);
 	}
 
 	public void onLoginOk() {
@@ -37,6 +33,4 @@ String password;
 		// TODO Auto-generated method stub
 
 	}
-
-
 }

@@ -52,4 +52,9 @@ public class SimpleBot extends Client {
     	}
         c.start();
 	}
+	@Override
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.*;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Iterator;
 
 
 /**
@@ -45,7 +46,10 @@ public class  PlayerList {
 			     br.readLine();
 			     String tmp=br.readLine();
 			     while(tmp!=null){
-			     	list.add(tmp);
+				     tmp=tmp.toLowerCase();
+			    	 if(!list.contains(tmp)){
+			    		 list.add(tmp);
+			    	 }
 			     	tmp=br.readLine();
 			     }
 			     return true;
@@ -107,16 +111,17 @@ public class  PlayerList {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	public boolean contains(String str){
+		for(Iterator itr=list.iterator();itr.hasNext();){
+			String next=itr.next().toString();
+			if(next.equalsIgnoreCase(next)){
+				return true;
+			}
+		}
+		return false;
+	}
 	public String toString(){
 		return name;
-	}
-	
-	/**
-	 * Returns true if the list contains the given name 
-	 * @param name
-	 * @return
-	 */
-	public boolean containsName( String name ){
-		return list.contains( name );
 	}
 }

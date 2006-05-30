@@ -511,4 +511,9 @@ class MyBot extends Client {
 	public void onAddNewEnhancedActor(EnhancedActor e){
 		seen.addPlayer(e.getActorStraightName(),e.getActorGuild());
 	}
+	@Override
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

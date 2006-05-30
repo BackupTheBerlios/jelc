@@ -241,5 +241,9 @@ File file =new File("guild.txt");
 		save();
 		return ok;
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -111,5 +111,9 @@ MyBot2 bot;
 		// TODO Auto-generated method stub
 		
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -76,7 +76,7 @@ PlayerList toldList;
 			return true;
 		}
 		//System.out.println("size: "+toldList.getList().size());
-		if(!toldList.containsName(name)){
+		if(!toldList.contains(name)){
 			if(type!=MyBot2.GM){
 				for(Iterator itr=list.iterator();itr.hasNext();){
 					/*String message=itr.next().toString();

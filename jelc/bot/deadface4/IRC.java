@@ -308,6 +308,11 @@ MyBot4 bot;
 		public void onMinute(int time) {
 			// TODO Auto-generated method stub
 		}
+
+		public void onIG(String message) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 	private class ircReplyer implements Replyer{

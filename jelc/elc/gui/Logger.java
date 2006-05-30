@@ -115,5 +115,9 @@ PrintWriter out;
 			System.out.println("closed file");
 		}
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

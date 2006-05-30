@@ -147,7 +147,7 @@ File file =new File("guild.txt");
 		return false;
 	}
     public boolean isGuild(String name){
-    	return bot.seen.getGuild("lnx").contains(name)||list.containsName(name);
+    	return bot.seen.getGuild("lnx").contains(name)||list.contains(name);
     }
 	/* (non-Javadoc)
 	 * @see bots.deadface2.BotCommand#sendHelp()
@@ -212,7 +212,7 @@ File file =new File("guild.txt");
 			bot.con.chatPm(gmTo, "#GM from "+person+": "+message);
 			//System.out.println("sent a message");
 		}
-		if(!list.containsName(person)){
+		if(!list.contains(person)){
 			list.getList().add(person);
 			save();
 		}
@@ -251,5 +251,9 @@ File file =new File("guild.txt");
 		save();
 		return ok;
 	}*/
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

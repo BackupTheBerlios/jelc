@@ -84,4 +84,9 @@ public class Ding implements ClientInterface {
 		
 	}
 
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

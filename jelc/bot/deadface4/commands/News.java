@@ -78,7 +78,7 @@ PlayerList toldList;
 			return true;
 		}
 		//System.out.println("size: "+toldList.getList().size());
-		if(!toldList.containsName(reply.getName())){
+		if(!toldList.contains(reply.getName())){
 			if(reply.getType()!=Misc.GM){
 				for(Iterator itr=list.iterator();itr.hasNext();){
 					/*String message=itr.next().toString();

@@ -283,4 +283,8 @@ ClientConnection con;
 	public void onMinute(int time) {
 		
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

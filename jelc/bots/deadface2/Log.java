@@ -102,5 +102,9 @@ File log;
 			e.printStackTrace();
 		}
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

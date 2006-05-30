@@ -427,6 +427,10 @@ static final char DARKER_BLUE=(char)732;
 		public void onMinute(int time) {
 			
 		}
+		public void onIG(String message) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	static String timeSince(String header,long time){
 		long difference=System.currentTimeMillis()-time;

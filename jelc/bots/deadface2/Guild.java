@@ -105,7 +105,7 @@ File file =new File("guild.txt");
 			}
 			else if(bot.admin.isAdmin(name)&&(args.length>1)&&(args[0].equalsIgnoreCase("guildlist"))){
 				if(args[1].equalsIgnoreCase("add")&&(args.length==3)){
-					if(!bot.guild.list.containsName(args[2])){
+					if(!bot.guild.list.contains(args[2])){
 						if(bot.guild.add(args[2])){
 							bot.reply(name,"add: "+args[2],type);
 						}
@@ -135,7 +135,7 @@ File file =new File("guild.txt");
 		return false;
 	}
     public boolean isGuild(String name){
-    	return bot.seen.getGuild("lnx").contains(name)||list.containsName(name);
+    	return bot.seen.getGuild("lnx").contains(name)||list.contains(name);
     }
 	/* (non-Javadoc)
 	 * @see bots.deadface2.BotCommand#sendHelp()
@@ -202,7 +202,7 @@ File file =new File("guild.txt");
 		if((message.toLowerCase()).startsWith("ding")){
 			bot.reply(person, "Well done "+person+" !!!",MyBot2.GM);
 		}
-		if(!list.containsName(person)){
+		if(!list.contains(person)){
 			list.getList().add(person);
 			save();
 		}

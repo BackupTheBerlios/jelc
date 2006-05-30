@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -50,7 +51,7 @@ public String Vitality;
 //Cross Attributes
 public String Might;
 public String Matter;
-public String Toughness;
+public String Toughness ;
 public String Charm;
 public String Reaction;
 public String Rationality;
@@ -78,6 +79,7 @@ public int attack;
 public int defense;
 
 private boolean privacy=false;
+private boolean locked=false;
 boolean updated=false;
 int status=NOTLOADED;
 private float lastUpdate;
@@ -148,11 +150,12 @@ private float lastUpdate;
 					return PRIVACYON;
 				}
 				else if(tmp.equals("<tr><td colspan=1><b>This player did nasty things and is locked</b></td></tr>")){
+					locked=true;
 					return LOCKED;
 				}
 				//d.readLine();//skip next line
 				tmp=d.readLine();
-				System.out.println(tmp);
+				//System.out.println(tmp);
 				Physique=trim(tmp.substring(26));
 				tmp= d.readLine();
 				Coordination=trim(tmp.substring(30));
@@ -610,6 +613,139 @@ private float lastUpdate;
 	}
 	public int getStatus(){
 		return status;
+	}
+	public void setStatus(int status){
+		this.status=status;
+	}
+	
+	
+	public boolean save(File f){
+		try {
+			PrintWriter out=new PrintWriter(f);
+			for(int i=0;i<5;i++){
+				out.println();
+			}
+			
+//			out.println("</style>");
+			out.println("</style><center><table width='30%'><tr><td colspan=1 align='middle'><b>"+name+"</b></td></tr>");
+			if(privacy){
+				out.println("<tr><td colspan=1><b>Privacy mode enabled for this user</b></td></tr>");
+				out.println("</table></center>");
+				out.flush();
+				return true;
+			}
+			else if(locked){
+				out.println("<tr><td colspan=1><b>This player did nasty things and is locked</b></td></tr>");
+				out.println("</table></center>");
+				out.flush();
+				return true;
+			}
+			else{
+				
+				
+				
+				out.println("<tr><td colspan=1><b>Main Attributes</b></td></tr>");
+				out.println("<tr><td>Physique:</td><td>"+Physique+"</td></tr>");
+				out.println("<tr><td>Coordination:</td><td>"+Coordination+"</td></tr>");
+				out.println("<tr><td>Reasoning:</td><td>"+Reasoning+"</td></tr>");
+				out.println("<tr><td>Will:</td><td>"+Will+"</td></tr>");
+
+				out.println("<tr><td>Instinct:</td><td>"+Instinct+"</td></tr>");
+				out.println("<tr><td>Vitality:</td><td>"+Vitality+"</td></tr>");
+				out.println("<tr><td colspan=1><b>Cross Attributes</b></td></tr>");
+				out.println("<tr><td>Might:</td><td>"+Might+"</td></tr>");
+				out.println("<tr><td>Matter:</td><td>"+Matter+"</td></tr>");
+				out.println("<tr><td>Toughness:</td><td>"+Toughness+"</td></tr>");
+
+				out.println("<tr><td>Charm:</td><td>"+Charm+"</td></tr>");
+				out.println("<tr><td>Reaction:</td><td>"+Reaction+"</td></tr>");
+				out.println("<tr><td>Rationality:</td><td>"+Rationality+"</td></tr>");
+				out.println("<tr><td>Dexterity:</td><td>"+Dexterity+"</td></tr>");
+				out.println("<tr><td>Ethereality:</td><td>"+Ethereality+"</td></tr>");
+				out.println("<tr><td colspan=1><b>Skills</b></td></tr>");
+
+				out.println("<tr><td>Overall:</td><td>"+Overall+"</td></tr>");
+				out.println("<tr><td>Attack:</td><td>"+Attack+"</td></tr>");
+				out.println("<tr><td>Defense:</td><td>"+Defense+"</td></tr>");
+				out.println("<tr><td>Magic:</td><td>"+Magic+"</td></tr>");
+				out.println("<tr><td>Harvest:</td><td>"+Harvest+"</td></tr>");
+				out.println("<tr><td>Manufacture:</td><td>"+Manufacture+"</td></tr>");
+				
+				out.println("<tr><td>Alchemy:</td><td>"+Alchemy+"</td></tr>");
+				out.println("<tr><td>Potion:</td><td>"+Potion+"</td></tr>");
+				out.println("<tr><td>Summoning:</td><td>"+Summoning+"</td></tr>");
+				out.println("<tr><td>Crafting:</td><td>"+Crafting+"</td></tr>");
+				out.println("</table></center>");
+
+				
+				
+				
+				/*Physique=trim(tmp.substring(26));
+				tmp= d.readLine();
+				Coordination=trim(tmp.substring(30));
+				tmp= d.readLine();
+				Reasoning=trim(tmp.substring(27));
+				tmp= d.readLine();
+				Will=trim(tmp.substring(22));
+				tmp= d.readLine();
+				Instinct=trim(tmp.substring(26));
+				tmp= d.readLine();
+				Vitality=trim(tmp.substring(26));
+				tmp= d.readLine();//gap
+				tmp= d.readLine();
+				Might=trim(tmp.substring(23));
+				tmp= d.readLine();
+				Matter=trim(tmp.substring(24));
+				tmp= d.readLine();
+				Toughness=trim(tmp.substring(27));
+				tmp= d.readLine();
+				Charm=trim(tmp.substring(23));
+				tmp= d.readLine();
+				Reaction=trim(tmp.substring(26));
+				tmp= d.readLine();
+				Rationality=trim(tmp.substring(29));
+				tmp= d.readLine();
+				Dexterity=trim(tmp.substring(27));
+				tmp= d.readLine();
+				Ethereality=trim(tmp.substring(29));
+				tmp= d.readLine();//skip
+				tmp= d.readLine();
+				Overall=trim(tmp.substring(25));
+				tmp= d.readLine();
+				Attack=trim(tmp.substring(24));
+				tmp= d.readLine();
+				Defense=trim(tmp.substring(25));
+				tmp= d.readLine();
+				Magic=trim(tmp.substring(23));
+				
+				tmp= d.readLine();
+				Harvest=trim(tmp.substring(25));
+				tmp= d.readLine();
+				Manufacture=trim(tmp.substring(29));
+				tmp= d.readLine();
+				Alchemy=trim(tmp.substring(25));
+				tmp= d.readLine();
+				Potion=trim(tmp.substring(24));
+				tmp= d.readLine();
+				Summoning=trim(tmp.substring(27));
+				tmp= d.readLine();
+				Crafting=trim(tmp.substring(26));
+				
+				//System.out.println("|"+tmp+"|");
+				
+				d.close();*/
+				
+				//System.out.println(dump());
+				//return PARSEDOK;
+				out.flush();
+				return true;
+			}
+			
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	

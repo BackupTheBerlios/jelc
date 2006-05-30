@@ -305,4 +305,8 @@ boolean channelActive=false;
 			return AccountManager.getAccountManger().getAccount(name);
 		}
 	}
+	public void onIG(String message) {
+		// TODO Auto-generated method stub
+		
+	}
 }

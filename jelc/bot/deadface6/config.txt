@@ -1,0 +1,46 @@
+# Your game username
+USERNAME:name
+# your game password
+PASSWORD:pass
+# The hostname of the server
+HOSTNAME:eternal-lands.network-studio.com
+# the port of the server 2001 is the test server, 2000 is main
+PORT:2000
+#database connection String, for mysql you should remember to put mysql-version.jar in your classpath
+DBCLASSNAME:com.mysql.jdbc.Driver
+# database connection string, this is for a mysql database but would be different (and might work) for other database structures
+DB:jdbc:mysql://localhost/DBNAME?user=USERNAME&password=PASSWORD
+# your guild tag, used for guild permissions
+MYGUILD:LNX
+# the news item, people are told this when they first use the bot so put news of updates etc here
+NEWS:This is a new news item
+# prefixes for #gm and irc, you can: #gm d, command
+PREFIX:d,
+PREFIX:dead,
+PREFIX:deadface,
+# this is a list of things that will be passed through unedited, used so it can pass through unedited strings ie not add #gm (name) message
+# this is relevent for our guild where we have several bots, people can use the irc bridge and access the other bots
+PASSTHROUGH:t,
+
+# this is the delay in minutes for the message to be broadcasted
+BROADCASTDELAY:15
+
+# the thing to broadcast (said in local so put the @@number message)
+BROADCASTMESSAGE:@@4join our guild or something
+
+
+#IRC stuff
+IRCBACKEND:name
+*irc2-name HOSTNAME: irc hostname
+*irc2-name PORT: 6667
+*irc2-name NICK: deadface
+*irc2-name PASSWORD: nickserv password
+*irc2-name CHANNEL: #channel (password)
+
+##example 
+IRCBACKEND:freenode
+*irc2-freenode HOSTNAME: irc.freenode.net
+*irc2-freenode PORT: 6667
+*irc2-freenode NICK: deadface
+*irc2-freenode PASSWORD: *******
+*irc2-freenode CHANNEL: #el-lnx *******

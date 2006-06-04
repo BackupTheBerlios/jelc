@@ -37,6 +37,11 @@ IRCBACKEND:name
 *irc2-name PASSWORD: nickserv password
 *irc2-name CHANNEL: #channel (password)
 
+
+# you also need to set up "pipes" between multiple backends,
+PIPE:el:broadcast irc2-name:#channel
+PIPE:el:gm irc2-name:#channel
+
 ##example 
 IRCBACKEND:freenode
 *irc2-freenode HOSTNAME: irc.freenode.net
@@ -44,3 +49,4 @@ IRCBACKEND:freenode
 *irc2-freenode NICK: deadface
 *irc2-freenode PASSWORD: *******
 *irc2-freenode CHANNEL: #el-lnx *******
+*irc2-freenode CHANNEL: #something
